@@ -52,7 +52,14 @@ export function CategoryCard({ category, onPress }: Props) {
         },
       ]}
     >
-      <Feather name="chevron-left" size={22} color={colors.mutedForeground} />
+      <LinearGradient
+        colors={meta.gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.iconWrap}
+      >
+        <Feather name={meta.icon} size={28} color="#fff" />
+      </LinearGradient>
       <View style={styles.center}>
         <Text style={[styles.title, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
           {category.title}
@@ -84,14 +91,7 @@ export function CategoryCard({ category, onPress }: Props) {
           />
         </View>
       </View>
-      <LinearGradient
-        colors={meta.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.iconWrap}
-      >
-        <Feather name={meta.icon} size={28} color="#fff" />
-      </LinearGradient>
+      <Feather name="chevron-left" size={22} color={colors.mutedForeground} />
     </Pressable>
   );
 }

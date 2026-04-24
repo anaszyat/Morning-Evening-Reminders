@@ -24,7 +24,7 @@ export function Header() {
       >
         <Feather
           name={theme === "dark" ? "sun" : "moon"}
-          size={18}
+          size={16}
           color={colors.primary}
         />
       </Pressable>
@@ -38,7 +38,7 @@ export function Header() {
         </Text>
       </View>
 
-      <View style={{ width: 38 }} />
+      <View style={{ width: 32 }} />
     </View>
   );
 }
@@ -48,25 +48,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 6,
   },
   titleWrap: {
     alignItems: "center",
     flex: 1,
   },
   title: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: "700",
   },
   subtitle: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 10,
+    marginTop: 1,
   },
   themeBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
