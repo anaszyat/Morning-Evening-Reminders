@@ -30,10 +30,10 @@ export function Header() {
       </Pressable>
 
       <View style={styles.titleWrap}>
-        <Text style={[styles.title, { color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+        <Text style={[styles.title, { color: colors.primary, fontFamily: "Tajawal_700Bold" }]}>
           أذكاري
         </Text>
-        <Text style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}>
+        <Text style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: "Tajawal_400Regular" }]}>
           حصن المسلم
         </Text>
       </View>

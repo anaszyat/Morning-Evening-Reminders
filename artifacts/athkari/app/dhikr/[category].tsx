@@ -34,7 +34,7 @@ export default function CategoryScreen() {
   if (!category) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorText, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
+        <Text style={[styles.errorText, { color: colors.foreground, fontFamily: "Tajawal_500Medium" }]}>
           الفئة غير موجودة
         </Text>
       </View>
@@ -75,10 +75,10 @@ export default function CategoryScreen() {
                 <Feather name="chevron-right" size={20} color="#fff" />
               </Pressable>
               <View style={styles.headerCenter}>
-                <Text style={[styles.heroTitle, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+                <Text style={[styles.heroTitle, { fontFamily: "Tajawal_700Bold" }]}>
                   {category.title}
                 </Text>
-                <Text style={[styles.heroSub, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
+                <Text style={[styles.heroSub, { fontFamily: "Tajawal_400Regular" }]}>
                   {category.subtitle}
                 </Text>
               </View>
@@ -100,13 +100,13 @@ export default function CategoryScreen() {
             </View>
 
             <View style={styles.progressRow}>
-              <Text style={[styles.percentText, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+              <Text style={[styles.percentText, { fontFamily: "Tajawal_700Bold" }]}>
                 {percent}%
               </Text>
               <View style={styles.barTrack}>
                 <View style={[styles.barFill, { width: `${percent}%` }]} />
               </View>
-              <Text style={[styles.progressText, { fontFamily: "IBMPlexSansArabic_500Medium" }]}>
+              <Text style={[styles.progressText, { fontFamily: "Tajawal_500Medium" }]}>
                 {done} / {total}
               </Text>
             </View>
@@ -170,7 +170,7 @@ function DhikrCard({
     >
       <View style={styles.dhikrHeader}>
         <View style={styles.indexBadge}>
-          <Text style={[styles.indexText, { color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+          <Text style={[styles.indexText, { color: colors.primary, fontFamily: "Tajawal_700Bold" }]}>
             {index}
           </Text>
         </View>
@@ -186,7 +186,7 @@ function DhikrCard({
           styles.dhikrText,
           {
             color: colors.foreground,
-            fontFamily: "IBMPlexSansArabic_500Medium",
+            fontFamily: "Tajawal_500Medium",
             opacity: isDone ? 0.6 : 1,
           },
         ]}
@@ -198,7 +198,7 @@ function DhikrCard({
         <View style={[styles.fadlBox, { backgroundColor: colors.accent }]}>
           <Feather name="award" size={12} color={colors.primary} />
           <Text
-            style={[styles.fadlText, { color: colors.accentForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}
+            style={[styles.fadlText, { color: colors.accentForeground, fontFamily: "Tajawal_400Regular" }]}
           >
             {dhikr.fadl}
           </Text>
@@ -207,7 +207,7 @@ function DhikrCard({
 
       <View style={[styles.dhikrFooter, { borderTopColor: colors.border }]}>
         {dhikr.reference && (
-          <Text style={[styles.refText, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}>
+          <Text style={[styles.refText, { color: colors.mutedForeground, fontFamily: "Tajawal_400Regular" }]}>
             {dhikr.reference}
           </Text>
         )}
@@ -236,10 +236,10 @@ function DhikrCard({
             />
           </Svg>
           <View style={styles.counterCenter} pointerEvents="none">
-            <Text style={[styles.counterCurrent, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+            <Text style={[styles.counterCurrent, { color: colors.foreground, fontFamily: "Tajawal_700Bold" }]}>
               {currentCount}
             </Text>
-            <Text style={[styles.counterTarget, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
+            <Text style={[styles.counterTarget, { color: colors.mutedForeground, fontFamily: "Tajawal_500Medium" }]}>
               /{dhikr.count}
             </Text>
           </View>

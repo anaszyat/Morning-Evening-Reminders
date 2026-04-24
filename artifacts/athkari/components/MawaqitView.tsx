@@ -109,7 +109,7 @@ export function MawaqitView() {
                 size={14}
                 color="#fff"
               />
-              <Text style={[styles.pillText, { fontFamily: "IBMPlexSansArabic_500Medium" }]}>
+              <Text style={[styles.pillText, { fontFamily: "Tajawal_500Medium" }]}>
                 تنبيهات الأذان
               </Text>
             </Pressable>
@@ -119,7 +119,7 @@ export function MawaqitView() {
               style={({ pressed }) => [styles.cityRow, { opacity: pressed ? 0.8 : 1 }]}
             >
               <Feather name="chevron-down" size={14} color="#fff" />
-              <Text style={[styles.cityText, { fontFamily: "IBMPlexSansArabic_600SemiBold" }]} numberOfLines={1}>
+              <Text style={[styles.cityText, { fontFamily: "Tajawal_700Bold" }]} numberOfLines={1}>
                 {effectiveLocation.name}
                 {effectiveLocation.country ? `، ${effectiveLocation.country}` : ""}
               </Text>
@@ -132,26 +132,26 @@ export function MawaqitView() {
           </View>
 
           <View style={styles.heroCenter}>
-            <Text style={[styles.heroLabel, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
+            <Text style={[styles.heroLabel, { fontFamily: "Tajawal_400Regular" }]}>
               متبقي على الأذان
             </Text>
-            <Text style={[styles.heroPrayer, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+            <Text style={[styles.heroPrayer, { fontFamily: "Tajawal_700Bold" }]}>
               {prayerLabels[next.key]}
             </Text>
             <View style={styles.countWrap}>
-              <Text style={[styles.countdown, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+              <Text style={[styles.countdown, { fontFamily: "Tajawal_700Bold" }]}>
                 {formatCountdown(remaining)}
               </Text>
             </View>
           </View>
 
           <View style={styles.heroBottom}>
-            <Text style={[styles.heroBottomTime, { fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
+            <Text style={[styles.heroBottomTime, { fontFamily: "Tajawal_700Bold" }]}>
               {formatTime12(next.time)}
             </Text>
             <View style={styles.nextRow}>
               <Feather name="sun" size={14} color="#FCD34D" />
-              <Text style={[styles.heroBottomLabel, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
+              <Text style={[styles.heroBottomLabel, { fontFamily: "Tajawal_400Regular" }]}>
                 الأذان القادم
               </Text>
             </View>
@@ -160,7 +160,7 @@ export function MawaqitView() {
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+        <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: "Tajawal_700Bold" }]}>
           مواقيت الصلاة
         </Text>
         <ScrollView
@@ -192,7 +192,7 @@ export function MawaqitView() {
                     styles.timeName,
                     {
                       color: isNext ? "#fff" : colors.foreground,
-                      fontFamily: "IBMPlexSansArabic_600SemiBold",
+                      fontFamily: "Tajawal_700Bold",
                     },
                   ]}
                 >
@@ -203,7 +203,7 @@ export function MawaqitView() {
                     styles.timeValue,
                     {
                       color: isNext ? "rgba(255,255,255,0.9)" : colors.mutedForeground,
-                      fontFamily: "IBMPlexSansArabic_500Medium",
+                      fontFamily: "Tajawal_500Medium",
                     },
                   ]}
                 >
@@ -216,14 +216,14 @@ export function MawaqitView() {
       </View>
 
       <View style={[styles.sunriseBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.sunriseTime, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+        <Text style={[styles.sunriseTime, { color: colors.foreground, fontFamily: "Tajawal_700Bold" }]}>
           {formatTime12(times.sunrise)}
         </Text>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <Text style={[styles.sunriseTitle, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+          <Text style={[styles.sunriseTitle, { color: colors.foreground, fontFamily: "Tajawal_700Bold" }]}>
             الشروق
           </Text>
-          <Text style={[styles.sunriseSub, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}>
+          <Text style={[styles.sunriseSub, { color: colors.mutedForeground, fontFamily: "Tajawal_400Regular" }]}>
             وقت ممنوع للصلاة
           </Text>
         </View>
@@ -264,7 +264,7 @@ export function MawaqitView() {
               styles.actionText,
               {
                 color: useDeviceLocation ? "#fff" : colors.foreground,
-                fontFamily: "IBMPlexSansArabic_600SemiBold",
+                fontFamily: "Tajawal_700Bold",
               },
             ]}
           >
@@ -283,7 +283,7 @@ export function MawaqitView() {
           ]}
         >
           <Feather name="map" size={14} color={colors.primary} />
-          <Text style={[styles.actionText, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
+          <Text style={[styles.actionText, { color: colors.foreground, fontFamily: "Tajawal_700Bold" }]}>
             اختر مدينة
           </Text>
         </Pressable>
@@ -292,13 +292,13 @@ export function MawaqitView() {
       {locationError && (
         <View style={[styles.errBox, { backgroundColor: "#FEE2E2" }]}>
           <Feather name="alert-circle" size={14} color="#B91C1C" />
-          <Text style={[styles.errText, { color: "#B91C1C", fontFamily: "IBMPlexSansArabic_500Medium" }]}>
+          <Text style={[styles.errText, { color: "#B91C1C", fontFamily: "Tajawal_500Medium" }]}>
             {locationError}
           </Text>
         </View>
       )}
 
-      <Text style={[styles.footer, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}>
+      <Text style={[styles.footer, { color: colors.mutedForeground, fontFamily: "Tajawal_400Regular" }]}>
         صدقة جارية - تطبيق أذكاري
       </Text>
 
@@ -313,7 +313,7 @@ export function MawaqitView() {
             <Pressable onPress={() => setShowCityPicker(false)} hitSlop={10}>
               <Feather name="x" size={24} color={colors.foreground} />
             </Pressable>
-            <Text style={[styles.modalTitle, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+            <Text style={[styles.modalTitle, { color: colors.foreground, fontFamily: "Tajawal_700Bold" }]}>
               اختر موقعك
             </Text>
             <View style={{ width: 24 }} />
@@ -350,7 +350,7 @@ export function MawaqitView() {
                     styles.deviceName,
                     {
                       color: useDeviceLocation ? "#fff" : colors.primary,
-                      fontFamily: "IBMPlexSansArabic_700Bold",
+                      fontFamily: "Tajawal_700Bold",
                     },
                   ]}
                 >
@@ -361,7 +361,7 @@ export function MawaqitView() {
                     styles.deviceSub,
                     {
                       color: useDeviceLocation ? "rgba(255,255,255,0.85)" : colors.primary,
-                      fontFamily: "IBMPlexSansArabic_500Medium",
+                      fontFamily: "Tajawal_500Medium",
                     },
                   ]}
                 >
@@ -384,7 +384,7 @@ export function MawaqitView() {
                 <Text
                   style={[
                     styles.disableText,
-                    { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" },
+                    { color: colors.mutedForeground, fontFamily: "Tajawal_500Medium" },
                   ]}
                 >
                   إيقاف استخدام موقعي
@@ -395,7 +395,7 @@ export function MawaqitView() {
             <Text
               style={[
                 styles.sectionLabel,
-                { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_600SemiBold" },
+                { color: colors.mutedForeground, fontFamily: "Tajawal_700Bold" },
               ]}
             >
               أو اختر مدينة
@@ -425,7 +425,7 @@ export function MawaqitView() {
                     <Text
                       style={[
                         styles.cityItemName,
-                        { color: colors.foreground, fontFamily: "IBMPlexSansArabic_600SemiBold" },
+                        { color: colors.foreground, fontFamily: "Tajawal_700Bold" },
                       ]}
                     >
                       {c.name}
@@ -433,7 +433,7 @@ export function MawaqitView() {
                     <Text
                       style={[
                         styles.cityItemCountry,
-                        { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" },
+                        { color: colors.mutedForeground, fontFamily: "Tajawal_400Regular" },
                       ]}
                     >
                       {c.country}
