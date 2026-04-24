@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "أذكاري"
+version = "1.0.0"
+id = "artifacts/athkari"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 19687
+
+[services.development]
+run = "pnpm --filter @workspace/athkari run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/athkari", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/athkari", "run", "serve" ]
+
+[services.env]
+PORT = "19687"
+BASE_PATH = "/"
