@@ -68,7 +68,7 @@ export function TasbihView() {
                   end={{ x: 1, y: 1 }}
                   style={styles.chipActive}
                 >
-                  <Text style={[styles.chipText, { color: "#fff", fontFamily: "Cairo_700Bold" }]}>
+                  <Text style={[styles.chipText, { color: "#fff", fontFamily: "IBMPlexSansArabic_700Bold" }]}>
                     {p.short}
                   </Text>
                 </LinearGradient>
@@ -80,7 +80,7 @@ export function TasbihView() {
                   ]}
                 >
                   <Text
-                    style={[styles.chipText, { color: colors.foreground, fontFamily: "Cairo_500Medium" }]}
+                    style={[styles.chipText, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_500Medium" }]}
                   >
                     {p.short}
                   </Text>
@@ -103,7 +103,7 @@ export function TasbihView() {
           },
         ]}
       >
-        <Text style={[styles.phrase, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
+        <Text style={[styles.phrase, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
           {active.text}
         </Text>
 
@@ -132,10 +132,10 @@ export function TasbihView() {
             />
           </Svg>
           <View style={styles.ringCenter} pointerEvents="none">
-            <Text style={[styles.bigCount, { color: colors.primary, fontFamily: "Cairo_700Bold" }]}>
+            <Text style={[styles.bigCount, { color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
               {count}
             </Text>
-            <Text style={[styles.target, { color: colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}>
+            <Text style={[styles.target, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
               الهدف: {active.target}
             </Text>
           </View>
@@ -143,9 +143,9 @@ export function TasbihView() {
 
         <View style={styles.actionRow}>
           <View style={styles.totalPill}>
-            <Text style={[styles.totalLabel, { color: colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}>
+            <Text style={[styles.totalLabel, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
               المجموع الكلي:{" "}
-              <Text style={{ color: colors.primary, fontFamily: "Cairo_700Bold" }}>{totalTasbih}</Text>
+              <Text style={{ color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" }}>{totalTasbih}</Text>
             </Text>
           </View>
 
@@ -163,7 +163,7 @@ export function TasbihView() {
             ]}
           >
             <Feather name="rotate-ccw" size={14} color={colors.mutedForeground} />
-            <Text style={[styles.resetText, { color: colors.foreground, fontFamily: "Cairo_500Medium" }]}>
+            <Text style={[styles.resetText, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
               تصفير العد
             </Text>
           </Pressable>
@@ -173,10 +173,10 @@ export function TasbihView() {
       <View
         style={[styles.fadlCard, { backgroundColor: colors.card, borderColor: colors.border }]}
       >
-        <Text style={[styles.fadlTitle, { color: colors.primary, fontFamily: "Cairo_700Bold" }]}>
+        <Text style={[styles.fadlTitle, { color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
           فضل الذكر
         </Text>
-        <Text style={[styles.fadlText, { color: colors.mutedForeground, fontFamily: "Cairo_400Regular" }]}>
+        <Text style={[styles.fadlText, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}>
           {active.fadl}
         </Text>
       </View>

@@ -140,7 +140,7 @@ export function QiblaView() {
               styles.calibText,
               {
                 color: accuracyHint === "low" ? "#B45309" : colors.primary,
-                fontFamily: "Cairo_600SemiBold",
+                fontFamily: "IBMPlexSansArabic_600SemiBold",
               },
             ]}
           >
@@ -152,7 +152,7 @@ export function QiblaView() {
           <Text
             style={[
               styles.locationName,
-              { color: colors.foreground, fontFamily: "Cairo_700Bold" },
+              { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" },
             ]}
             numberOfLines={1}
           >
@@ -162,7 +162,7 @@ export function QiblaView() {
             <Text
               style={[
                 styles.locationCountry,
-                { color: colors.mutedForeground, fontFamily: "Cairo_400Regular" },
+                { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" },
               ]}
               numberOfLines={1}
             >
@@ -199,10 +199,10 @@ export function QiblaView() {
           },
         ]}
       >
-        <Text style={[styles.title, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
+        <Text style={[styles.title, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
           القبلة
         </Text>
-        <Text style={[styles.distance, { color: colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}>
+        <Text style={[styles.distance, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
           المسافة إلى مكة: {Math.round(distance).toLocaleString("ar-EG")} كم
         </Text>
 
@@ -215,10 +215,10 @@ export function QiblaView() {
           />
         </View>
 
-        <Text style={[styles.angle, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
+        <Text style={[styles.angle, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
           {Math.round(qiblaBearing)}°
         </Text>
-        <Text style={[styles.angleLabel, { color: aligned ? colors.success : colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}>
+        <Text style={[styles.angleLabel, { color: aligned ? colors.success : colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
           {hasSensor && heading !== null
             ? aligned
               ? "أنت متجه نحو القبلة الآن ✓"
@@ -236,7 +236,7 @@ export function QiblaView() {
           >
             <Feather name="alert-triangle" size={14} color="#B45309" />
             <Text
-              style={[styles.warningText, { color: "#B45309", fontFamily: "Cairo_500Medium" }]}
+              style={[styles.warningText, { color: "#B45309", fontFamily: "IBMPlexSansArabic_500Medium" }]}
             >
               قراءة البوصلة غير مستقرة. اضغط للمعايرة.
             </Text>
@@ -249,7 +249,7 @@ export function QiblaView() {
             <Text
               style={[
                 styles.noticeText,
-                { color: colors.accentForeground, fontFamily: "Cairo_500Medium" },
+                { color: colors.accentForeground, fontFamily: "IBMPlexSansArabic_500Medium" },
               ]}
             >
               {Platform.OS === "web"
@@ -271,10 +271,10 @@ export function QiblaView() {
             <Feather name="navigation" size={18} color={colors.primary} />
           </View>
           <View style={{ flex: 1, alignItems: "flex-end" }}>
-            <Text style={[styles.tipTitle, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
+            <Text style={[styles.tipTitle, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
               نصائح لاستخدام البوصلة
             </Text>
-            <Text style={[styles.tipText, { color: colors.mutedForeground, fontFamily: "Cairo_400Regular" }]}>
+            <Text style={[styles.tipText, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}>
               ضع جهازك أفقياً، وابتعد عن المعادن. لو كانت القراءة غير دقيقة شغّل المعايرة على شكل ٨.
             </Text>
           </View>

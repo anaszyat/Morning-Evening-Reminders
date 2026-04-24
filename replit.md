@@ -16,7 +16,7 @@
 - **المدن**: `constants/cities.ts` (27 مدينة بإحداثياتها).
 - **حسابات الصلاة والقبلة**: `lib/prayerTimes.ts` — حساب محلي بطريقة أم القرى للصلوات، وزاوية القبلة بمعادلة الدائرة العظمى نحو إحداثيات الكعبة.
 - **البوصلة**: تستخدم `expo-sensors` (Magnetometer) على iOS/Android، مع رسالة تنبيه على الويب.
-- **الخط**: Cairo (400/500/600/700) من `@expo-google-fonts/cairo`.
+- **الخط**: IBM Plex Sans Arabic (400/500/600/700) من `@expo-google-fonts/ibm-plex-sans-arabic` — بديل مجاني هندسي قريب من Graphik.
 - **الثيم**: أزرق غامق `#1E40AF / #1E3A8A` مع تدرّجات ونمط نجوم خفيف.
 
 ## Workflows

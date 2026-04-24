@@ -92,14 +92,14 @@ export function CompassCalibration({ visible, onClose }: Props) {
             <Pressable onPress={onClose} hitSlop={10} style={styles.closeBtn}>
               <Feather name="x" size={22} color={colors.foreground} />
             </Pressable>
-            <Text style={[styles.title, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
+            <Text style={[styles.title, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
               معايرة البوصلة
             </Text>
             <View style={{ width: 32 }} />
           </View>
 
           <Text
-            style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}
+            style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}
           >
             حرّك جهازك في الهواء على شكل الرقم ٨
             {"\n"}عدة مرات لمعايرة الحساس المغناطيسي
@@ -150,7 +150,7 @@ export function CompassCalibration({ visible, onClose }: Props) {
                 style={[styles.progressFill, { width: `${lapPercent}%` }]}
               />
             </View>
-            <Text style={[styles.progressText, { color: colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}>
+            <Text style={[styles.progressText, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
               {done ? "اكتملت المعايرة" : "جارٍ المعايرة..."}
             </Text>
           </View>
@@ -159,7 +159,7 @@ export function CompassCalibration({ visible, onClose }: Props) {
             <View style={styles.tipRow}>
               <View style={[styles.tipDot, { backgroundColor: colors.primary }]} />
               <Text
-                style={[styles.tipText, { color: colors.foreground, fontFamily: "Cairo_400Regular" }]}
+                style={[styles.tipText, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_400Regular" }]}
               >
                 ابتعد عن الأجهزة الإلكترونية والمعادن
               </Text>
@@ -167,7 +167,7 @@ export function CompassCalibration({ visible, onClose }: Props) {
             <View style={styles.tipRow}>
               <View style={[styles.tipDot, { backgroundColor: colors.primary }]} />
               <Text
-                style={[styles.tipText, { color: colors.foreground, fontFamily: "Cairo_400Regular" }]}
+                style={[styles.tipText, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_400Regular" }]}
               >
                 حرّك الجهاز ببطء على شكل ∞ لمدة 10 ثوان
               </Text>
@@ -175,7 +175,7 @@ export function CompassCalibration({ visible, onClose }: Props) {
             <View style={styles.tipRow}>
               <View style={[styles.tipDot, { backgroundColor: colors.primary }]} />
               <Text
-                style={[styles.tipText, { color: colors.foreground, fontFamily: "Cairo_400Regular" }]}
+                style={[styles.tipText, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_400Regular" }]}
               >
                 كرّر العملية إذا كانت قراءة البوصلة غير دقيقة
               </Text>
@@ -193,7 +193,7 @@ export function CompassCalibration({ visible, onClose }: Props) {
               style={styles.confirmBtn}
             >
               <Feather name={done ? "check" : "compass"} size={16} color="#fff" />
-              <Text style={[styles.confirmText, { fontFamily: "Cairo_700Bold" }]}>
+              <Text style={[styles.confirmText, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
                 {done ? "تمّت المعايرة" : "تخطّي والعودة للبوصلة"}
               </Text>
             </LinearGradient>

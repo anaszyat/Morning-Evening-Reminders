@@ -1,10 +1,10 @@
 import {
-  Cairo_400Regular,
-  Cairo_500Medium,
-  Cairo_600SemiBold,
-  Cairo_700Bold,
+  IBMPlexSansArabic_400Regular,
+  IBMPlexSansArabic_500Medium,
+  IBMPlexSansArabic_600SemiBold,
+  IBMPlexSansArabic_700Bold,
   useFonts,
-} from "@expo-google-fonts/cairo";
+} from "@expo-google-fonts/ibm-plex-sans-arabic";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -32,7 +32,7 @@ function ThemedStack() {
         screenOptions={{
           headerStyle: { backgroundColor: palette.background },
           headerTintColor: palette.foreground,
-          headerTitleStyle: { fontFamily: "Cairo_700Bold" },
+          headerTitleStyle: { fontFamily: "IBMPlexSansArabic_700Bold" },
           headerBackTitle: "رجوع",
           contentStyle: { backgroundColor: palette.background },
         }}
@@ -53,10 +53,10 @@ function ThemedStack() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Cairo_400Regular,
-    Cairo_500Medium,
-    Cairo_600SemiBold,
-    Cairo_700Bold,
+    IBMPlexSansArabic_400Regular,
+    IBMPlexSansArabic_500Medium,
+    IBMPlexSansArabic_600SemiBold,
+    IBMPlexSansArabic_700Bold,
   });
 
   useEffect(() => {

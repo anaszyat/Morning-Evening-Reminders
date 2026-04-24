@@ -54,20 +54,20 @@ export function CategoryCard({ category, onPress }: Props) {
     >
       <Feather name="chevron-left" size={22} color={colors.mutedForeground} />
       <View style={styles.center}>
-        <Text style={[styles.title, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
+        <Text style={[styles.title, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
           {category.title}
         </Text>
         <Text
-          style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: "Cairo_400Regular" }]}
+          style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}
         >
           {category.subtitle}
         </Text>
         <View style={styles.metaRow}>
-          <Text style={[styles.percent, { color: colors.primary, fontFamily: "Cairo_700Bold" }]}>
+          <Text style={[styles.percent, { color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
             {percent}%
           </Text>
           <Text
-            style={[styles.count, { color: colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}
+            style={[styles.count, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}
           >
             {done} / {total}
           </Text>

@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "@expo-google-fonts/cairo": "^0.4.2",
+    "@expo-google-fonts/ibm-plex-sans-arabic": "^0.4.2",
     "expo-sensors": "^15.0.8"
   }
 }

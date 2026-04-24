@@ -25,13 +25,13 @@ export function HeroProgress() {
         <StarPattern color="#ffffff" opacity={0.06} />
         <View style={styles.row}>
           <View style={styles.right}>
-            <Text style={[styles.salam, { fontFamily: "Cairo_400Regular" }]}>
+            <Text style={[styles.salam, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
               السلام عليكم
             </Text>
-            <Text style={[styles.headline, { fontFamily: "Cairo_700Bold" }]}>
+            <Text style={[styles.headline, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
               ابدأ يومك بذكر الله
             </Text>
-            <Text style={[styles.sub, { fontFamily: "Cairo_500Medium" }]}>
+            <Text style={[styles.sub, { fontFamily: "IBMPlexSansArabic_500Medium" }]}>
               أكملت <Text style={styles.subBold}>{totalCompletedToday}</Text> من{" "}
               <Text style={styles.subBold}>{totalAdhkar}</Text> ذكرًا
             </Text>
@@ -61,10 +61,10 @@ export function HeroProgress() {
               />
             </Svg>
             <View style={styles.ringCenter} pointerEvents="none">
-              <Text style={[styles.percent, { fontFamily: "Cairo_700Bold" }]}>
+              <Text style={[styles.percent, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
                 {overallPercent}%
               </Text>
-              <Text style={[styles.percentLabel, { fontFamily: "Cairo_400Regular" }]}>
+              <Text style={[styles.percentLabel, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
                 إنجاز اليوم
               </Text>
             </View>
