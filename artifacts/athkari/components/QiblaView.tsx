@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { Magnetometer } from "expo-sensors";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import Svg, { Circle, G, Image as SvgImage, Line, Polygon, Text as SvgText } from "react-native-svg";
+import Svg, { Circle, G, Line, Polygon, Text as SvgText } from "react-native-svg";
 
+import { CompassCalibration } from "@/components/CompassCalibration";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/hooks/useColors";
 import { calculateDistanceToMecca, calculateQiblaBearing } from "@/lib/prayerTimes";
@@ -22,9 +24,13 @@ function angleToCompass(angle: number): string {
 
 export function QiblaView() {
   const colors = useColors();
-  const { city } = useApp();
+  const { effectiveLocation, requestDeviceLocation, locationStatus, useDeviceLocation } = useApp();
   const [heading, setHeading] = useState<number | null>(null);
   const [hasSensor, setHasSensor] = useState<boolean>(false);
+  const [showCalibration, setShowCalibration] = useState<boolean>(false);
+  const [accuracyHint, setAccuracyHint] = useState<"good" | "low">("good");
+  const magBufferRef = useRef<number[]>([]);
+  const alignedRef = useRef<boolean>(false);
 
   useEffect(() => {
     let sub: { remove: () => void } | null = null;
@@ -41,10 +47,23 @@ export function QiblaView() {
         setHasSensor(true);
         Magnetometer.setUpdateInterval(120);
         sub = Magnetometer.addListener((data) => {
-          const { x, y } = data;
+          const { x, y, z } = data;
           let angle = Math.atan2(y, x) * (180 / Math.PI);
           if (angle < 0) angle += 360;
           setHeading(angle);
+          // Track field magnitude for rough calibration check (Earth's field ~25-65 µT)
+          const mag = Math.sqrt(x * x + y * y + z * z);
+          const buf = magBufferRef.current;
+          buf.push(mag);
+          if (buf.length > 30) buf.shift();
+          if (buf.length >= 15) {
+            const avg = buf.reduce((s, v) => s + v, 0) / buf.length;
+            const variance =
+              buf.reduce((s, v) => s + (v - avg) ** 2, 0) / buf.length;
+            const std = Math.sqrt(variance);
+            const looksOk = avg > 15 && avg < 90 && std < 25;
+            setAccuracyHint(looksOk ? "good" : "low");
+          }
         });
       })
       .catch(() => setHasSensor(false));
@@ -54,12 +73,12 @@ export function QiblaView() {
   }, []);
 
   const qiblaBearing = useMemo(
-    () => calculateQiblaBearing(city.latitude, city.longitude),
-    [city.id],
+    () => calculateQiblaBearing(effectiveLocation.latitude, effectiveLocation.longitude),
+    [effectiveLocation.latitude, effectiveLocation.longitude],
   );
   const distance = useMemo(
-    () => calculateDistanceToMecca(city.latitude, city.longitude),
-    [city.id],
+    () => calculateDistanceToMecca(effectiveLocation.latitude, effectiveLocation.longitude),
+    [effectiveLocation.latitude, effectiveLocation.longitude],
   );
 
   // Rotation of compass dial: -heading so North stays at top relative to device
@@ -69,6 +88,26 @@ export function QiblaView() {
   const turnAmount = ((qiblaBearing - (heading ?? 0)) + 360) % 360;
   const turnDirection = turnAmount > 180 ? 360 - turnAmount : turnAmount;
   const turnSide = turnAmount > 180 ? "يساراً" : "يميناً";
+  const aligned = heading !== null && Math.abs(turnDirection) < 5;
+
+  // Haptic feedback when first aligned with qibla
+  useEffect(() => {
+    if (aligned && !alignedRef.current) {
+      alignedRef.current = true;
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      }
+    } else if (!aligned && alignedRef.current) {
+      alignedRef.current = false;
+    }
+  }, [aligned]);
+
+  const onRequestLocation = () => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+    requestDeviceLocation();
+  };
 
   return (
     <ScrollView
@@ -77,8 +116,87 @@ export function QiblaView() {
     >
       <View
         style={[
-          styles.card,
+          styles.locationBar,
           { backgroundColor: colors.card, borderColor: colors.border },
+        ]}
+      >
+        <Pressable
+          onPress={() => setShowCalibration(true)}
+          style={({ pressed }) => [
+            styles.calibBtn,
+            {
+              backgroundColor: accuracyHint === "low" ? "#FEF3C7" : colors.accent,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <Feather
+            name={accuracyHint === "low" ? "alert-triangle" : "activity"}
+            size={14}
+            color={accuracyHint === "low" ? "#B45309" : colors.primary}
+          />
+          <Text
+            style={[
+              styles.calibText,
+              {
+                color: accuracyHint === "low" ? "#B45309" : colors.primary,
+                fontFamily: "Cairo_600SemiBold",
+              },
+            ]}
+          >
+            معايرة
+          </Text>
+        </Pressable>
+
+        <View style={styles.locationCenter}>
+          <Text
+            style={[
+              styles.locationName,
+              { color: colors.foreground, fontFamily: "Cairo_700Bold" },
+            ]}
+            numberOfLines={1}
+          >
+            {effectiveLocation.name}
+          </Text>
+          {effectiveLocation.country ? (
+            <Text
+              style={[
+                styles.locationCountry,
+                { color: colors.mutedForeground, fontFamily: "Cairo_400Regular" },
+              ]}
+              numberOfLines={1}
+            >
+              {effectiveLocation.country}
+            </Text>
+          ) : null}
+        </View>
+
+        <Pressable
+          onPress={onRequestLocation}
+          disabled={locationStatus === "requesting"}
+          style={({ pressed }) => [
+            styles.locBtn,
+            {
+              backgroundColor: useDeviceLocation ? colors.primary : colors.accent,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <Feather
+            name={useDeviceLocation ? "navigation-2" : "map-pin"}
+            size={14}
+            color={useDeviceLocation ? "#fff" : colors.primary}
+          />
+        </Pressable>
+      </View>
+
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.card,
+            borderColor: aligned ? colors.success : colors.border,
+          },
         ]}
       >
         <Text style={[styles.title, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
@@ -93,17 +211,37 @@ export function QiblaView() {
             dialRotation={dialRotation}
             kaabaAngle={kaabaAngle}
             colors={colors}
+            aligned={aligned}
           />
         </View>
 
         <Text style={[styles.angle, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
           {Math.round(qiblaBearing)}°
         </Text>
-        <Text style={[styles.angleLabel, { color: colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}>
+        <Text style={[styles.angleLabel, { color: aligned ? colors.success : colors.mutedForeground, fontFamily: "Cairo_500Medium" }]}>
           {hasSensor && heading !== null
-            ? `استدر ${Math.round(turnDirection)}° ${turnSide} نحو القبلة`
-            : `اتجاه القبلة من ${city.name}: ${angleToCompass(qiblaBearing)}`}
+            ? aligned
+              ? "أنت متجه نحو القبلة الآن ✓"
+              : `استدر ${Math.round(turnDirection)}° ${turnSide} نحو القبلة`
+            : `اتجاه القبلة من ${effectiveLocation.name}: ${angleToCompass(qiblaBearing)}`}
         </Text>
+
+        {accuracyHint === "low" && hasSensor && (
+          <Pressable
+            onPress={() => setShowCalibration(true)}
+            style={({ pressed }) => [
+              styles.warning,
+              { backgroundColor: "#FEF3C7", opacity: pressed ? 0.85 : 1 },
+            ]}
+          >
+            <Feather name="alert-triangle" size={14} color="#B45309" />
+            <Text
+              style={[styles.warningText, { color: "#B45309", fontFamily: "Cairo_500Medium" }]}
+            >
+              قراءة البوصلة غير مستقرة. اضغط للمعايرة.
+            </Text>
+          </Pressable>
+        )}
 
         {!hasSensor && (
           <View style={[styles.notice, { backgroundColor: colors.accent }]}>
@@ -137,11 +275,21 @@ export function QiblaView() {
               نصائح لاستخدام البوصلة
             </Text>
             <Text style={[styles.tipText, { color: colors.mutedForeground, fontFamily: "Cairo_400Regular" }]}>
-              ضع جهازك أفقياً، وابتعد عن المعادن والأجهزة الإلكترونية.
+              ضع جهازك أفقياً، وابتعد عن المعادن. لو كانت القراءة غير دقيقة شغّل المعايرة على شكل ٨.
             </Text>
           </View>
         </View>
       </View>
+
+      <CompassCalibration
+        visible={showCalibration}
+        onClose={() => {
+          setShowCalibration(false);
+          // Reset accuracy buffer after calibration so it re-evaluates
+          magBufferRef.current = [];
+          setAccuracyHint("good");
+        }}
+      />
     </ScrollView>
   );
 }
@@ -150,10 +298,12 @@ function Compass({
   dialRotation,
   kaabaAngle,
   colors,
+  aligned,
 }: {
   dialRotation: number;
   kaabaAngle: number;
   colors: ReturnType<typeof useColors>;
+  aligned: boolean;
 }) {
   const size = 280;
   const cx = size / 2;
@@ -175,16 +325,18 @@ function Compass({
   const kx = cx + Math.cos(angleRad) * (r - 6);
   const ky = cy + Math.sin(angleRad) * (r - 6);
 
+  const ringColor = aligned ? colors.success : colors.primary;
+
   return (
     <Svg width={size} height={size}>
-      <Circle cx={cx} cy={cy} r={r + 6} fill={colors.card} stroke={colors.border} strokeWidth={1} />
+      <Circle cx={cx} cy={cy} r={r + 6} fill={colors.card} stroke={ringColor} strokeWidth={aligned ? 2 : 1} opacity={aligned ? 0.6 : 1} />
       <Circle cx={cx} cy={cy} r={r - 14} fill="transparent" stroke={colors.border} strokeWidth={1} />
 
       {/* Pointer (top arrow) */}
       <Polygon
         points={`${cx},${cy - r - 2} ${cx - 8},${cy - r + 12} ${cx + 8},${cy - r + 12}`}
-        fill={colors.mutedForeground}
-        opacity={0.5}
+        fill={ringColor}
+        opacity={0.85}
       />
 
       <G rotation={dialRotation} origin={`${cx}, ${cy}`}>
@@ -229,7 +381,6 @@ function Compass({
           );
         })}
 
-        {/* small inner dots */}
         {[45, 135, 225, 315].map((a) => {
           const rad = ((a - 90) * Math.PI) / 180;
           const px = cx + Math.cos(rad) * (labelR - 18);
@@ -241,11 +392,11 @@ function Compass({
 
         {/* Kaaba marker */}
         <G>
-          <Circle cx={kx} cy={ky} r={18} fill="#fff" stroke={colors.primary} strokeWidth={2} />
+          <Circle cx={kx} cy={ky} r={20} fill="#fff" stroke={ringColor} strokeWidth={2.5} />
           <SvgText
             x={kx}
-            y={ky + 5}
-            fontSize={18}
+            y={ky + 6}
+            fontSize={20}
             textAnchor="middle"
             fill="#000"
           >
@@ -254,19 +405,49 @@ function Compass({
         </G>
       </G>
 
-      <Circle cx={cx} cy={cy} r={20} fill={colors.primary} />
+      <Circle cx={cx} cy={cy} r={20} fill={ringColor} />
       <Circle cx={cx} cy={cy} r={6} fill="#fff" />
     </Svg>
   );
 }
 
 const styles = StyleSheet.create({
+  locationBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginHorizontal: 16,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 18,
+    borderWidth: 1,
+  },
+  calibBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 99,
+  },
+  calibText: { fontSize: 12 },
+  locationCenter: { flex: 1, alignItems: "center" },
+  locationName: { fontSize: 14, textAlign: "center" },
+  locationCountry: { fontSize: 11, marginTop: 1, textAlign: "center" },
+  locBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   card: {
     marginHorizontal: 16,
     marginTop: 10,
     padding: 18,
     borderRadius: 24,
-    borderWidth: 1,
+    borderWidth: 1.5,
     alignItems: "center",
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
@@ -279,6 +460,17 @@ const styles = StyleSheet.create({
   compassWrap: { marginTop: 16, marginBottom: 8 },
   angle: { fontSize: 36, fontWeight: "700", marginTop: 8 },
   angleLabel: { fontSize: 13, marginTop: 4, textAlign: "center" },
+  warning: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+    marginTop: 14,
+    width: "100%",
+  },
+  warningText: { flex: 1, fontSize: 12, textAlign: "right" },
   notice: {
     flexDirection: "row",
     alignItems: "center",
@@ -306,5 +498,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tipTitle: { fontSize: 14, fontWeight: "700", textAlign: "right" },
-  tipText: { fontSize: 12, marginTop: 2, textAlign: "right" },
+  tipText: { fontSize: 12, marginTop: 2, textAlign: "right", lineHeight: 20 },
 });

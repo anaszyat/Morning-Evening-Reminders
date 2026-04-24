@@ -14,9 +14,17 @@
       "backgroundColor": "#1E3A8A"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "السماح لأذكاري باستخدام موقعك لتحديد مواقيت الصلاة واتجاه القبلة بدقة."
+      }
     },
-    "android": {},
+    "android": {
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
@@ -25,6 +33,12 @@
         "expo-router",
         {
           "origin": "https://replit.com/"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "السماح لأذكاري باستخدام موقعك لتحديد مواقيت الصلاة واتجاه القبلة بدقة."
         }
       ],
       "expo-font",

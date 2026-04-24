@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
 import React, {
   createContext,
   useCallback,
@@ -7,6 +8,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { Platform } from "react-native";
 
 import { adhkarCategories, totalDailyAdhkar } from "@/constants/adhkar";
 import { cities, type City } from "@/constants/cities";
@@ -18,11 +20,28 @@ const STORAGE_KEYS = {
   city: "athkari:city:v1",
   notifications: "athkari:notifications:v1",
   theme: "athkari:theme:v1",
+  useDeviceLocation: "athkari:useDeviceLocation:v1",
+  deviceLocation: "athkari:deviceLocation:v1",
 };
 
 type ProgressMap = Record<string, number>;
 type TasbihMap = Record<string, number>;
 type ThemeMode = "light" | "dark";
+
+export type DeviceLocation = {
+  latitude: number;
+  longitude: number;
+  name: string;
+  country: string;
+};
+
+export type EffectiveLocation = {
+  latitude: number;
+  longitude: number;
+  name: string;
+  country: string;
+  isDevice: boolean;
+};
 
 type AppContextValue = {
   loaded: boolean;
@@ -43,6 +62,13 @@ type AppContextValue = {
   // Location
   city: City;
   setCity: (city: City) => void;
+  useDeviceLocation: boolean;
+  deviceLocation: DeviceLocation | null;
+  effectiveLocation: EffectiveLocation;
+  locationStatus: "idle" | "requesting" | "granted" | "denied" | "error";
+  locationError: string | null;
+  requestDeviceLocation: () => Promise<boolean>;
+  disableDeviceLocation: () => void;
   // Notifications
   notificationsEnabled: boolean;
   toggleNotifications: () => void;
@@ -60,6 +86,60 @@ function todayKeyFor(date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+async function reverseGeocode(latitude: number, longitude: number): Promise<{ name: string; country: string }> {
+  try {
+    if (Platform.OS === "web") {
+      // Web: try Nominatim public endpoint with Arabic language
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=ar`,
+          { headers: { Accept: "application/json" } },
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const name =
+            data.address?.city ||
+            data.address?.town ||
+            data.address?.village ||
+            data.address?.county ||
+            data.address?.state ||
+            "موقعك الحالي";
+          const country = data.address?.country || "";
+          return { name, country };
+        }
+      } catch {
+        // ignore
+      }
+      return { name: "موقعك الحالي", country: "" };
+    }
+    const places = await Location.reverseGeocodeAsync({ latitude, longitude });
+    const p = places[0];
+    if (p) {
+      const name =
+        p.city || p.subregion || p.region || p.district || "موقعك الحالي";
+      const country = p.country || "";
+      return { name, country };
+    }
+  } catch {
+    // ignore
+  }
+  return { name: "موقعك الحالي", country: "" };
+}
+
+function getWebPosition(): Promise<{ latitude: number; longitude: number }> {
+  return new Promise((resolve, reject) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      reject(new Error("Geolocation غير مدعوم في المتصفح"));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+      (err) => reject(err),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+    );
+  });
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [loaded, setLoaded] = useState(false);
   const [progress, setProgress] = useState<ProgressMap>({});
@@ -68,18 +148,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [todayKey, setTodayKey] = useState<string>(todayKeyFor());
+  const [useDeviceLocation, setUseDeviceLocation] = useState(false);
+  const [deviceLocation, setDeviceLocation] = useState<DeviceLocation | null>(null);
+  const [locationStatus, setLocationStatus] = useState<
+    "idle" | "requesting" | "granted" | "denied" | "error"
+  >("idle");
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   // Load persisted state
   useEffect(() => {
     (async () => {
       try {
-        const [progRaw, tasRaw, cityRaw, notifRaw, themeRaw] = await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEYS.progress),
-          AsyncStorage.getItem(STORAGE_KEYS.tasbih),
-          AsyncStorage.getItem(STORAGE_KEYS.city),
-          AsyncStorage.getItem(STORAGE_KEYS.notifications),
-          AsyncStorage.getItem(STORAGE_KEYS.theme),
-        ]);
+        const [progRaw, tasRaw, cityRaw, notifRaw, themeRaw, useLocRaw, devLocRaw] =
+          await Promise.all([
+            AsyncStorage.getItem(STORAGE_KEYS.progress),
+            AsyncStorage.getItem(STORAGE_KEYS.tasbih),
+            AsyncStorage.getItem(STORAGE_KEYS.city),
+            AsyncStorage.getItem(STORAGE_KEYS.notifications),
+            AsyncStorage.getItem(STORAGE_KEYS.theme),
+            AsyncStorage.getItem(STORAGE_KEYS.useDeviceLocation),
+            AsyncStorage.getItem(STORAGE_KEYS.deviceLocation),
+          ]);
         if (progRaw) {
           const parsed = JSON.parse(progRaw) as { date: string; data: ProgressMap };
           if (parsed.date === todayKeyFor()) {
@@ -93,6 +182,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         if (notifRaw) setNotificationsEnabled(notifRaw === "true");
         if (themeRaw === "dark" || themeRaw === "light") setTheme(themeRaw);
+        if (useLocRaw === "true") setUseDeviceLocation(true);
+        if (devLocRaw) {
+          try {
+            const parsed = JSON.parse(devLocRaw) as DeviceLocation;
+            if (
+              parsed &&
+              typeof parsed.latitude === "number" &&
+              typeof parsed.longitude === "number"
+            ) {
+              setDeviceLocation(parsed);
+              if (useLocRaw === "true") setLocationStatus("granted");
+            }
+          } catch {
+            // ignore
+          }
+        }
       } catch {
         // ignore storage errors
       } finally {
@@ -203,7 +308,81 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setCity = useCallback((c: City) => {
     setCityState(c);
     AsyncStorage.setItem(STORAGE_KEYS.city, c.id).catch(() => {});
+    // Switching to a manual city disables device location
+    setUseDeviceLocation(false);
+    AsyncStorage.setItem(STORAGE_KEYS.useDeviceLocation, "false").catch(() => {});
   }, []);
+
+  const requestDeviceLocation = useCallback(async (): Promise<boolean> => {
+    setLocationStatus("requesting");
+    setLocationError(null);
+    try {
+      let lat: number;
+      let lng: number;
+      if (Platform.OS === "web") {
+        const pos = await getWebPosition();
+        lat = pos.latitude;
+        lng = pos.longitude;
+      } else {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setLocationStatus("denied");
+          setLocationError("لم يُسمح بالوصول إلى الموقع.");
+          return false;
+        }
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        lat = loc.coords.latitude;
+        lng = loc.coords.longitude;
+      }
+      const place = await reverseGeocode(lat, lng);
+      const next: DeviceLocation = {
+        latitude: lat,
+        longitude: lng,
+        name: place.name,
+        country: place.country,
+      };
+      setDeviceLocation(next);
+      setUseDeviceLocation(true);
+      setLocationStatus("granted");
+      AsyncStorage.setItem(STORAGE_KEYS.deviceLocation, JSON.stringify(next)).catch(() => {});
+      AsyncStorage.setItem(STORAGE_KEYS.useDeviceLocation, "true").catch(() => {});
+      return true;
+    } catch (e: unknown) {
+      setLocationStatus("error");
+      const msg =
+        e instanceof Error
+          ? e.message
+          : "تعذّر الحصول على الموقع. تأكد من تفعيل خدمات الموقع.";
+      setLocationError(msg);
+      return false;
+    }
+  }, []);
+
+  const disableDeviceLocation = useCallback(() => {
+    setUseDeviceLocation(false);
+    AsyncStorage.setItem(STORAGE_KEYS.useDeviceLocation, "false").catch(() => {});
+  }, []);
+
+  const effectiveLocation: EffectiveLocation = useMemo(() => {
+    if (useDeviceLocation && deviceLocation) {
+      return {
+        latitude: deviceLocation.latitude,
+        longitude: deviceLocation.longitude,
+        name: deviceLocation.name,
+        country: deviceLocation.country,
+        isDevice: true,
+      };
+    }
+    return {
+      latitude: city.latitude,
+      longitude: city.longitude,
+      name: city.name,
+      country: city.country,
+      isDevice: false,
+    };
+  }, [useDeviceLocation, deviceLocation, city]);
 
   const toggleNotifications = useCallback(() => {
     setNotificationsEnabled((prev) => {
@@ -237,6 +416,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     resetTasbih,
     city,
     setCity,
+    useDeviceLocation,
+    deviceLocation,
+    effectiveLocation,
+    locationStatus,
+    locationError,
+    requestDeviceLocation,
+    disableDeviceLocation,
     notificationsEnabled,
     toggleNotifications,
     theme,

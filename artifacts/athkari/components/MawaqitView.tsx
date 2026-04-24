@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Modal,
   Platform,
   Pressable,
@@ -36,7 +37,19 @@ const PRAYER_ICONS: Record<PrayerKey, keyof typeof Feather.glyphMap> = {
 
 export function MawaqitView() {
   const colors = useColors();
-  const { city, setCity, notificationsEnabled, toggleNotifications } = useApp();
+  const {
+    city,
+    setCity,
+    notificationsEnabled,
+    toggleNotifications,
+    effectiveLocation,
+    useDeviceLocation,
+    deviceLocation,
+    locationStatus,
+    locationError,
+    requestDeviceLocation,
+    disableDeviceLocation,
+  } = useApp();
   const [now, setNow] = useState(new Date());
   const [showCityPicker, setShowCityPicker] = useState(false);
 
@@ -46,10 +59,16 @@ export function MawaqitView() {
   }, []);
 
   const times = useMemo(
-    () => calculatePrayerTimes(now, city.latitude, city.longitude, "UmmAlQura"),
-    // recompute only when day or city changes
+    () =>
+      calculatePrayerTimes(
+        now,
+        effectiveLocation.latitude,
+        effectiveLocation.longitude,
+        "UmmAlQura",
+      ),
+    // recompute only when day or location changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [city.id, now.getDate()],
+    [effectiveLocation.latitude, effectiveLocation.longitude, now.getDate()],
   );
 
   const next = useMemo(() => getNextPrayer(times, now), [times, now]);
@@ -98,10 +117,15 @@ export function MawaqitView() {
               style={({ pressed }) => [styles.cityRow, { opacity: pressed ? 0.8 : 1 }]}
             >
               <Feather name="chevron-down" size={14} color="#fff" />
-              <Text style={[styles.cityText, { fontFamily: "Cairo_600SemiBold" }]}>
-                {city.name}، {city.country}
+              <Text style={[styles.cityText, { fontFamily: "Cairo_600SemiBold" }]} numberOfLines={1}>
+                {effectiveLocation.name}
+                {effectiveLocation.country ? `، ${effectiveLocation.country}` : ""}
               </Text>
-              <Feather name="map-pin" size={14} color="#fff" />
+              <Feather
+                name={effectiveLocation.isDevice ? "navigation-2" : "map-pin"}
+                size={14}
+                color="#fff"
+              />
             </Pressable>
           </View>
 
@@ -212,20 +236,37 @@ export function MawaqitView() {
             if (Platform.OS !== "web") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
             }
-            setNow(new Date());
+            requestDeviceLocation();
           }}
+          disabled={locationStatus === "requesting"}
           style={({ pressed }) => [
             styles.actionBtn,
             {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
+              backgroundColor: useDeviceLocation ? colors.primary : colors.card,
+              borderColor: useDeviceLocation ? colors.primary : colors.border,
               opacity: pressed ? 0.8 : 1,
             },
           ]}
         >
-          <Feather name="refresh-cw" size={14} color={colors.primary} />
-          <Text style={[styles.actionText, { color: colors.foreground, fontFamily: "Cairo_600SemiBold" }]}>
-            تحديث
+          {locationStatus === "requesting" ? (
+            <ActivityIndicator size="small" color={useDeviceLocation ? "#fff" : colors.primary} />
+          ) : (
+            <Feather
+              name={useDeviceLocation ? "navigation-2" : "navigation"}
+              size={14}
+              color={useDeviceLocation ? "#fff" : colors.primary}
+            />
+          )}
+          <Text
+            style={[
+              styles.actionText,
+              {
+                color: useDeviceLocation ? "#fff" : colors.foreground,
+                fontFamily: "Cairo_600SemiBold",
+              },
+            ]}
+          >
+            {useDeviceLocation ? "موقعي الحالي" : "استخدام موقعي"}
           </Text>
         </Pressable>
         <Pressable
@@ -239,12 +280,21 @@ export function MawaqitView() {
             },
           ]}
         >
-          <Feather name="settings" size={14} color={colors.primary} />
+          <Feather name="map" size={14} color={colors.primary} />
           <Text style={[styles.actionText, { color: colors.foreground, fontFamily: "Cairo_600SemiBold" }]}>
-            الإعدادات
+            اختر مدينة
           </Text>
         </Pressable>
       </View>
+
+      {locationError && (
+        <View style={[styles.errBox, { backgroundColor: "#FEE2E2" }]}>
+          <Feather name="alert-circle" size={14} color="#B91C1C" />
+          <Text style={[styles.errText, { color: "#B91C1C", fontFamily: "Cairo_500Medium" }]}>
+            {locationError}
+          </Text>
+        </View>
+      )}
 
       <Text style={[styles.footer, { color: colors.mutedForeground, fontFamily: "Cairo_400Regular" }]}>
         صدقة جارية - تطبيق أذكاري
@@ -262,13 +312,95 @@ export function MawaqitView() {
               <Feather name="x" size={24} color={colors.foreground} />
             </Pressable>
             <Text style={[styles.modalTitle, { color: colors.foreground, fontFamily: "Cairo_700Bold" }]}>
-              اختر مدينتك
+              اختر موقعك
             </Text>
             <View style={{ width: 24 }} />
           </View>
           <ScrollView contentContainerStyle={{ paddingVertical: 8 }}>
+            <Pressable
+              onPress={async () => {
+                if (Platform.OS !== "web") {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                }
+                const ok = await requestDeviceLocation();
+                if (ok) setShowCityPicker(false);
+              }}
+              style={({ pressed }) => [
+                styles.deviceItem,
+                {
+                  backgroundColor: useDeviceLocation ? colors.primary : colors.accent,
+                  opacity: pressed ? 0.85 : 1,
+                },
+              ]}
+            >
+              {locationStatus === "requesting" ? (
+                <ActivityIndicator color={useDeviceLocation ? "#fff" : colors.primary} />
+              ) : (
+                <Feather
+                  name="navigation-2"
+                  size={18}
+                  color={useDeviceLocation ? "#fff" : colors.primary}
+                />
+              )}
+              <View style={{ flex: 1, alignItems: "flex-end" }}>
+                <Text
+                  style={[
+                    styles.deviceName,
+                    {
+                      color: useDeviceLocation ? "#fff" : colors.primary,
+                      fontFamily: "Cairo_700Bold",
+                    },
+                  ]}
+                >
+                  استخدام موقعي الحالي (GPS)
+                </Text>
+                <Text
+                  style={[
+                    styles.deviceSub,
+                    {
+                      color: useDeviceLocation ? "rgba(255,255,255,0.85)" : colors.primary,
+                      fontFamily: "Cairo_500Medium",
+                    },
+                  ]}
+                >
+                  {useDeviceLocation && deviceLocation
+                    ? `${deviceLocation.name}${deviceLocation.country ? `، ${deviceLocation.country}` : ""}`
+                    : "أدق توقيت لمواقيت صلاتك واتجاه القبلة"}
+                </Text>
+              </View>
+            </Pressable>
+
+            {useDeviceLocation && (
+              <Pressable
+                onPress={() => disableDeviceLocation()}
+                style={({ pressed }) => [
+                  styles.disableBtn,
+                  { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+                ]}
+              >
+                <Feather name="x-circle" size={14} color={colors.mutedForeground} />
+                <Text
+                  style={[
+                    styles.disableText,
+                    { color: colors.mutedForeground, fontFamily: "Cairo_500Medium" },
+                  ]}
+                >
+                  إيقاف استخدام موقعي
+                </Text>
+              </Pressable>
+            )}
+
+            <Text
+              style={[
+                styles.sectionLabel,
+                { color: colors.mutedForeground, fontFamily: "Cairo_600SemiBold" },
+              ]}
+            >
+              أو اختر مدينة
+            </Text>
+
             {cities.map((c) => {
-              const selected = c.id === city.id;
+              const selected = !useDeviceLocation && c.id === city.id;
               return (
                 <Pressable
                   key={c.id}
@@ -336,6 +468,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 8,
   },
   pill: {
     flexDirection: "row",
@@ -350,8 +483,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    flexShrink: 1,
   },
-  cityText: { color: "#fff", fontSize: 14 },
+  cityText: { color: "#fff", fontSize: 13, flexShrink: 1 },
   heroCenter: {
     alignItems: "center",
     paddingTop: 24,
@@ -439,6 +573,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
     marginTop: 18,
+    paddingHorizontal: 16,
   },
   actionBtn: {
     flexDirection: "row",
@@ -448,8 +583,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 99,
     borderWidth: 1,
+    minWidth: 140,
+    justifyContent: "center",
   },
   actionText: { fontSize: 13, fontWeight: "600" },
+  errBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+  },
+  errText: { fontSize: 12, flex: 1, textAlign: "right" },
   footer: {
     fontSize: 11,
     textAlign: "center",
@@ -464,6 +612,36 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   modalTitle: { fontSize: 17, fontWeight: "700" },
+  deviceItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginHorizontal: 12,
+    marginTop: 8,
+    borderRadius: 18,
+  },
+  deviceName: { fontSize: 14, textAlign: "right" },
+  deviceSub: { fontSize: 12, marginTop: 2, textAlign: "right" },
+  disableBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginHorizontal: 12,
+    marginTop: 8,
+    paddingVertical: 10,
+    borderRadius: 99,
+    borderWidth: 1,
+  },
+  disableText: { fontSize: 12 },
+  sectionLabel: {
+    fontSize: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    textAlign: "right",
+  },
   cityItem: {
     flexDirection: "row",
     alignItems: "center",
