@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 
+import { MosqueArches } from "@/components/MosqueArches";
 import { StarPattern } from "@/components/StarPattern";
 import { cities } from "@/constants/cities";
 import { useApp } from "@/contexts/AppContext";
@@ -88,7 +89,8 @@ export function MawaqitView() {
           end={{ x: 1, y: 1 }}
           style={styles.hero}
         >
-          <StarPattern color="#ffffff" opacity={0.05} />
+          <StarPattern color="#ffffff" opacity={0.04} />
+          <MosqueArches color="#ffffff" opacity={0.18} />
           <View style={styles.heroTop}>
             <Pressable
               onPress={toggleNotifications}

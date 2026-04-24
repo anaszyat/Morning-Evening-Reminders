@@ -1,0 +1,95 @@
+{
+  "colorScheme": "dark",
+  "fonts": [
+    {
+      "family": "Mikhak",
+      "role": "body"
+    },
+    {
+      "family": "CameraPlainVariable",
+      "role": "unknown"
+    },
+    {
+      "family": "Roboto",
+      "role": "body"
+    },
+    {
+      "family": "Segoe UI",
+      "role": "body"
+    },
+    {
+      "family": "system-ui",
+      "role": "unknown"
+    }
+  ],
+  "colors": {
+    "primary": "#121A2B",
+    "accent": "#0B111E",
+    "background": "#1B1B1B",
+    "textPrimary": "#0B111E",
+    "link": "#0B111E"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Mikhak",
+      "heading": "Mikhak"
+    },
+    "fontStacks": {
+      "heading": [
+        "Mikhak",
+        "system-ui",
+        "sans-serif"
+      ],
+      "body": [
+        "Mikhak",
+        "system-ui",
+        "sans-serif"
+      ],
+      "paragraph": [
+        "Mikhak",
+        "system-ui",
+        "sans-serif"
+      ]
+    },
+    "fontSizes": {
+      "h1": "24px",
+      "h2": "20px",
+      "body": "11.2px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 4,
+    "borderRadius": "10px"
+  },
+  "components": {},
+  "images": {
+    "logo": null,
+    "favicon": "https://preview--azkar-blissful-guide.lovable.app/icons/icon-192.png",
+    "ogImage": "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/151dc537-d643-4894-a28c-19206431dc56/id-preview-bcddbdd1--5e0f399c-809f-4797-83d9-713f23141e32.lovable.app-1777010439741.png"
+  },
+  "personality": {
+    "tone": "traditional",
+    "energy": "medium",
+    "targetAudience": "unknown"
+  },
+  "designSystem": {
+    "framework": "tailwind",
+    "componentLibrary": "unknown"
+  },
+  "confidence": {
+    "buttons": 0,
+    "colors": 0.9,
+    "overall": 0.45
+  },
+  "__llm_metadata": {
+    "logoSelection": {
+      "llmCalled": false,
+      "llmSucceeded": false,
+      "finalSource": "none"
+    },
+    "buttonClassification": {
+      "llmCalled": false,
+      "llmSucceeded": false
+    }
+  }
+}
