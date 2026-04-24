@@ -51,7 +51,7 @@ export function TopTabs({ active, onChange }: Props) {
                 style={styles.activeBg}
               >
                 <Feather name={t.icon} size={18} color="#fff" />
-                <Text style={[styles.label, { color: "#fff", fontFamily: "Tajawal_700Bold" }]}>
+                <Text style={[styles.label, { color: "#fff", fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
                   {t.label}
                 </Text>
               </LinearGradient>
@@ -59,7 +59,7 @@ export function TopTabs({ active, onChange }: Props) {
               <View style={styles.inactive}>
                 <Feather name={t.icon} size={18} color={colors.mutedForeground} />
                 <Text
-                  style={[styles.label, { color: colors.mutedForeground, fontFamily: "Tajawal_500Medium" }]}
+                  style={[styles.label, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}
                   numberOfLines={1}
                 >
                   {t.label}
