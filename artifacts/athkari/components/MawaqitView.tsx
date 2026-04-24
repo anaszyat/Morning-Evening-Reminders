@@ -14,10 +14,12 @@ import {
 } from "react-native";
 
 import { MosqueArches } from "@/components/MosqueArches";
+import { NotificationsModal } from "@/components/NotificationsModal";
 import { StarPattern } from "@/components/StarPattern";
 import { cities } from "@/constants/cities";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/hooks/useColors";
+import { schedulePrayerNotifications } from "@/lib/notifications";
 import {
   calculatePrayerTimes,
   formatCountdown,
@@ -42,7 +44,7 @@ export function MawaqitView() {
     city,
     setCity,
     notificationsEnabled,
-    toggleNotifications,
+    prayerNotifications,
     effectiveLocation,
     useDeviceLocation,
     deviceLocation,
@@ -53,6 +55,7 @@ export function MawaqitView() {
   } = useApp();
   const [now, setNow] = useState(new Date());
   const [showCityPicker, setShowCityPicker] = useState(false);
+  const [showNotifModal, setShowNotifModal] = useState(false);
 
   useEffect(() => {
     const i = setInterval(() => setNow(new Date()), 1000);
@@ -75,7 +78,27 @@ export function MawaqitView() {
   const next = useMemo(() => getNextPrayer(times, now), [times, now]);
   const remaining = next.time.getTime() - now.getTime();
 
+  // Order shown right-to-left in the row: fajr first on the right, isha last on the left
   const prayerOrder: PrayerKey[] = ["isha", "maghrib", "asr", "dhuhr", "fajr"];
+
+  // Re-schedule local notifications whenever times or settings change
+  useEffect(() => {
+    schedulePrayerNotifications(times, prayerNotifications, notificationsEnabled).catch(
+      () => {},
+    );
+  }, [
+    times.fajr.getTime(),
+    times.dhuhr.getTime(),
+    times.asr.getTime(),
+    times.maghrib.getTime(),
+    times.isha.getTime(),
+    prayerNotifications.fajr,
+    prayerNotifications.dhuhr,
+    prayerNotifications.asr,
+    prayerNotifications.maghrib,
+    prayerNotifications.isha,
+    notificationsEnabled,
+  ]);
 
   return (
     <ScrollView
@@ -93,7 +116,12 @@ export function MawaqitView() {
           <MosqueArches color="#ffffff" opacity={0.18} />
           <View style={styles.heroTop}>
             <Pressable
-              onPress={toggleNotifications}
+              onPress={() => {
+                if (Platform.OS !== "web") {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                }
+                setShowNotifModal(true);
+              }}
               style={({ pressed }) => [
                 styles.pill,
                 {
@@ -163,12 +191,7 @@ export function MawaqitView() {
         <Text style={[styles.sectionTitle, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
           مواقيت الصلاة
         </Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.timesRow}
-          inverted
-        >
+        <View style={styles.timesRow}>
           {prayerOrder.map((key) => {
             const isNext = next.key === key && !next.isTomorrow;
             return (
@@ -184,7 +207,7 @@ export function MawaqitView() {
               >
                 <Feather
                   name={PRAYER_ICONS[key]}
-                  size={20}
+                  size={16}
                   color={isNext ? "#fff" : colors.gold}
                 />
                 <Text
@@ -195,6 +218,7 @@ export function MawaqitView() {
                       fontFamily: "IBMPlexSansArabic_600SemiBold",
                     },
                   ]}
+                  numberOfLines={1}
                 >
                   {prayerLabels[key]}
                 </Text>
@@ -206,13 +230,14 @@ export function MawaqitView() {
                       fontFamily: "IBMPlexSansArabic_500Medium",
                     },
                   ]}
+                  numberOfLines={1}
                 >
                   {formatTime12(times[key])}
                 </Text>
               </View>
             );
           })}
-        </ScrollView>
+        </View>
       </View>
 
       <View style={[styles.sunriseBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -445,6 +470,11 @@ export function MawaqitView() {
           </ScrollView>
         </View>
       </Modal>
+
+      <NotificationsModal
+        visible={showNotifModal}
+        onClose={() => setShowNotifModal(false)}
+      />
     </ScrollView>
   );
 }
@@ -538,17 +568,22 @@ const styles = StyleSheet.create({
     textAlign: "right",
     marginBottom: 10,
   },
-  timesRow: { gap: 10, paddingVertical: 4 },
+  timesRow: {
+    flexDirection: "row",
+    gap: 6,
+    paddingVertical: 4,
+  },
   timeCard: {
-    width: 78,
-    paddingVertical: 14,
-    borderRadius: 18,
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    borderRadius: 14,
     borderWidth: 1,
     alignItems: "center",
-    gap: 6,
+    gap: 4,
   },
-  timeName: { fontSize: 13, fontWeight: "600" },
-  timeValue: { fontSize: 11 },
+  timeName: { fontSize: 12, fontWeight: "600" },
+  timeValue: { fontSize: 10 },
   sunriseBox: {
     flexDirection: "row",
     alignItems: "center",

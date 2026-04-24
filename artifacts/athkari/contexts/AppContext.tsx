@@ -13,15 +13,26 @@ import { Platform } from "react-native";
 import { adhkarCategories, totalDailyAdhkar } from "@/constants/adhkar";
 import { cities, type City } from "@/constants/cities";
 import { tasbihPhrases } from "@/constants/tasbih";
+import type { PrayerKey } from "@/lib/prayerTimes";
 
 const STORAGE_KEYS = {
   progress: "athkari:progress:v1",
   tasbih: "athkari:tasbih:v1",
   city: "athkari:city:v1",
   notifications: "athkari:notifications:v1",
+  prayerNotifications: "athkari:prayerNotifications:v1",
   theme: "athkari:theme:v1",
   useDeviceLocation: "athkari:useDeviceLocation:v1",
   deviceLocation: "athkari:deviceLocation:v1",
+};
+
+const DEFAULT_PRAYER_NOTIFICATIONS: Record<PrayerKey, boolean> = {
+  fajr: true,
+  sunrise: false,
+  dhuhr: true,
+  asr: true,
+  maghrib: true,
+  isha: true,
 };
 
 type ProgressMap = Record<string, number>;
@@ -72,6 +83,8 @@ type AppContextValue = {
   // Notifications
   notificationsEnabled: boolean;
   toggleNotifications: () => void;
+  prayerNotifications: Record<PrayerKey, boolean>;
+  togglePrayerNotification: (key: PrayerKey) => void;
   // Theme
   theme: ThemeMode;
   toggleTheme: () => void;
@@ -146,6 +159,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [tasbih, setTasbih] = useState<TasbihMap>({});
   const [city, setCityState] = useState<City>(cities[5]); // Kuwait by default
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [prayerNotifications, setPrayerNotifications] = useState<Record<PrayerKey, boolean>>(
+    DEFAULT_PRAYER_NOTIFICATIONS,
+  );
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [todayKey, setTodayKey] = useState<string>(todayKeyFor());
   const [useDeviceLocation, setUseDeviceLocation] = useState(false);
@@ -159,12 +175,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const [progRaw, tasRaw, cityRaw, notifRaw, themeRaw, useLocRaw, devLocRaw] =
+        const [progRaw, tasRaw, cityRaw, notifRaw, prayNotifRaw, themeRaw, useLocRaw, devLocRaw] =
           await Promise.all([
             AsyncStorage.getItem(STORAGE_KEYS.progress),
             AsyncStorage.getItem(STORAGE_KEYS.tasbih),
             AsyncStorage.getItem(STORAGE_KEYS.city),
             AsyncStorage.getItem(STORAGE_KEYS.notifications),
+            AsyncStorage.getItem(STORAGE_KEYS.prayerNotifications),
             AsyncStorage.getItem(STORAGE_KEYS.theme),
             AsyncStorage.getItem(STORAGE_KEYS.useDeviceLocation),
             AsyncStorage.getItem(STORAGE_KEYS.deviceLocation),
@@ -181,6 +198,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (found) setCityState(found);
         }
         if (notifRaw) setNotificationsEnabled(notifRaw === "true");
+        if (prayNotifRaw) {
+          try {
+            const parsed = JSON.parse(prayNotifRaw) as Record<PrayerKey, boolean>;
+            setPrayerNotifications({ ...DEFAULT_PRAYER_NOTIFICATIONS, ...parsed });
+          } catch {
+            // ignore
+          }
+        }
         if (themeRaw === "dark" || themeRaw === "light") setTheme(themeRaw);
         if (useLocRaw === "true") setUseDeviceLocation(true);
         if (devLocRaw) {
@@ -392,6 +417,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const togglePrayerNotification = useCallback((key: PrayerKey) => {
+    setPrayerNotifications((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      AsyncStorage.setItem(
+        STORAGE_KEYS.prayerNotifications,
+        JSON.stringify(next),
+      ).catch(() => {});
+      return next;
+    });
+  }, []);
+
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
       const next = prev === "dark" ? "light" : "dark";
@@ -425,6 +461,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     disableDeviceLocation,
     notificationsEnabled,
     toggleNotifications,
+    prayerNotifications,
+    togglePrayerNotification,
     theme,
     toggleTheme,
   };
