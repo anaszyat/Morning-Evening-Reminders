@@ -75,14 +75,52 @@ function asrTime(latitude: number, decl: number, factor = 1): number {
   return angleTime(asrAngle, latitude, decl);
 }
 
-export type PrayerMethod = "UmmAlQura" | "MuslimWorldLeague" | "Egyptian" | "Karachi";
+export type PrayerMethod =
+  | "UmmAlQura"
+  | "MuslimWorldLeague"
+  | "Egyptian"
+  | "Karachi"
+  | "ISNA"
+  | "Dubai"
+  | "Qatar"
+  | "Kuwait"
+  | "Singapore";
 
 const methodAngles: Record<PrayerMethod, { fajr: number; isha: number | "90min" }> = {
   UmmAlQura: { fajr: 18.5, isha: "90min" },
   MuslimWorldLeague: { fajr: 18, isha: 17 },
   Egyptian: { fajr: 19.5, isha: 17.5 },
   Karachi: { fajr: 18, isha: 18 },
+  ISNA: { fajr: 15, isha: 15 },
+  Dubai: { fajr: 18.2, isha: 18.2 },
+  Qatar: { fajr: 18, isha: "90min" },
+  Kuwait: { fajr: 18, isha: 17.5 },
+  Singapore: { fajr: 20, isha: 18 },
 };
+
+export const prayerMethodLabels: Record<PrayerMethod, string> = {
+  UmmAlQura: "أم القرى - السعودية",
+  MuslimWorldLeague: "رابطة العالم الإسلامي",
+  Egyptian: "الهيئة المصرية العامة للمساحة",
+  Karachi: "جامعة العلوم الإسلامية - كراتشي",
+  ISNA: "الجمعية الإسلامية لأمريكا الشمالية",
+  Dubai: "هيئة الإمارات للأوقاف",
+  Qatar: "قطر",
+  Kuwait: "الكويت",
+  Singapore: "سنغافورة (مجلس العلماء)",
+};
+
+export const prayerMethods: PrayerMethod[] = [
+  "UmmAlQura",
+  "MuslimWorldLeague",
+  "Egyptian",
+  "Karachi",
+  "ISNA",
+  "Dubai",
+  "Qatar",
+  "Kuwait",
+  "Singapore",
+];
 
 export type PrayerTimes = {
   fajr: Date;
@@ -202,6 +240,22 @@ export const prayerLabels: Record<PrayerKey, string> = {
   maghrib: "المغرب",
   isha: "العشاء",
 };
+
+/**
+ * Returns the most recent prayer time at or before `now`.
+ * Falls back to "yesterday's isha" if all of today's prayers are still upcoming.
+ */
+export function getPrevPrayerTime(times: PrayerTimes, now: Date): Date {
+  const order: PrayerKey[] = ["isha", "maghrib", "asr", "dhuhr", "sunrise", "fajr"];
+  for (const key of order) {
+    if (times[key].getTime() <= now.getTime()) {
+      return times[key];
+    }
+  }
+  const prev = new Date(times.isha);
+  prev.setDate(prev.getDate() - 1);
+  return prev;
+}
 
 export function getNextPrayer(
   times: PrayerTimes,

@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 
+import { CountdownArc } from "@/components/CountdownArc";
 import { MosqueArches } from "@/components/MosqueArches";
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { StarPattern } from "@/components/StarPattern";
@@ -25,7 +26,10 @@ import {
   formatCountdown,
   formatTime12,
   getNextPrayer,
+  getPrevPrayerTime,
   prayerLabels,
+  prayerMethodLabels,
+  prayerMethods,
   type PrayerKey,
 } from "@/lib/prayerTimes";
 
@@ -45,6 +49,8 @@ export function MawaqitView() {
     setCity,
     notificationsEnabled,
     prayerNotifications,
+    calculationMethod,
+    setCalculationMethod,
     effectiveLocation,
     useDeviceLocation,
     deviceLocation,
@@ -68,15 +74,24 @@ export function MawaqitView() {
         now,
         effectiveLocation.latitude,
         effectiveLocation.longitude,
-        "UmmAlQura",
+        calculationMethod,
       ),
-    // recompute only when day or location changes
+    // recompute when day, location, or method changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [effectiveLocation.latitude, effectiveLocation.longitude, now.getDate()],
+    [effectiveLocation.latitude, effectiveLocation.longitude, now.getDate(), calculationMethod],
   );
 
   const next = useMemo(() => getNextPrayer(times, now), [times, now]);
   const remaining = next.time.getTime() - now.getTime();
+
+  // Fraction of the interval between previous and next prayer that REMAINS.
+  const remainingFraction = useMemo(() => {
+    const prev = getPrevPrayerTime(times, now);
+    const total = next.time.getTime() - prev.getTime();
+    if (total <= 0) return 1;
+    const elapsed = now.getTime() - prev.getTime();
+    return Math.max(0, Math.min(1, 1 - elapsed / total));
+  }, [times, next.time, now]);
 
   // Order shown right-to-left in the row: fajr first on the right, isha last on the left
   const prayerOrder: PrayerKey[] = ["isha", "maghrib", "asr", "dhuhr", "fajr"];
@@ -166,10 +181,19 @@ export function MawaqitView() {
             <Text style={[styles.heroPrayer, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
               {prayerLabels[next.key]}
             </Text>
-            <View style={styles.countWrap}>
-              <Text style={[styles.countdown, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
-                {formatCountdown(remaining)}
-              </Text>
+            <View style={styles.arcWrap}>
+              <CountdownArc
+                size={260}
+                strokeWidth={6}
+                progress={remainingFraction}
+                bgColor="rgba(255,255,255,0.28)"
+                fgColor="#FCD34D"
+              />
+              <View style={styles.arcCountWrap}>
+                <Text style={[styles.countdown, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+                  {formatCountdown(remaining)}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -423,6 +447,44 @@ export function MawaqitView() {
                 { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_600SemiBold" },
               ]}
             >
+              طريقة الحساب
+            </Text>
+
+            {prayerMethods.map((m) => {
+              const selected = m === calculationMethod;
+              return (
+                <Pressable
+                  key={m}
+                  onPress={() => setCalculationMethod(m)}
+                  style={({ pressed }) => [
+                    styles.cityItem,
+                    {
+                      backgroundColor: selected ? colors.accent : "transparent",
+                      opacity: pressed ? 0.7 : 1,
+                    },
+                  ]}
+                >
+                  {selected && <Feather name="check" size={18} color={colors.primary} />}
+                  <View style={{ flex: 1, alignItems: "flex-end" }}>
+                    <Text
+                      style={[
+                        styles.cityItemName,
+                        { color: colors.foreground, fontFamily: "IBMPlexSansArabic_600SemiBold" },
+                      ]}
+                    >
+                      {prayerMethodLabels[m]}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+
+            <Text
+              style={[
+                styles.sectionLabel,
+                { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_600SemiBold" },
+              ]}
+            >
               أو اختر مدينة
             </Text>
 
@@ -534,12 +596,26 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginVertical: 6,
   },
-  countWrap: {
+  arcWrap: {
+    width: 260,
+    height: 140,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 6,
+    position: "relative",
+  },
+  arcCountWrap: {
+    position: "absolute",
+    top: 38,
+    left: 0,
+    right: 0,
+    alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.18)",
     paddingHorizontal: 22,
     paddingVertical: 10,
     borderRadius: 16,
-    marginTop: 8,
+    alignSelf: "center",
+    marginHorizontal: 30,
   },
   countdown: {
     color: "#fff",

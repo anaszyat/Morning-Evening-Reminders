@@ -13,7 +13,8 @@ import { Platform } from "react-native";
 import { adhkarCategories, totalDailyAdhkar } from "@/constants/adhkar";
 import { cities, type City } from "@/constants/cities";
 import { tasbihPhrases } from "@/constants/tasbih";
-import type { PrayerKey } from "@/lib/prayerTimes";
+import type { PrayerKey, PrayerMethod } from "@/lib/prayerTimes";
+import { prayerMethods } from "@/lib/prayerTimes";
 
 const STORAGE_KEYS = {
   progress: "athkari:progress:v1",
@@ -21,6 +22,7 @@ const STORAGE_KEYS = {
   city: "athkari:city:v1",
   notifications: "athkari:notifications:v1",
   prayerNotifications: "athkari:prayerNotifications:v1",
+  calculationMethod: "athkari:calcMethod:v1",
   theme: "athkari:theme:v1",
   useDeviceLocation: "athkari:useDeviceLocation:v1",
   deviceLocation: "athkari:deviceLocation:v1",
@@ -85,6 +87,9 @@ type AppContextValue = {
   toggleNotifications: () => void;
   prayerNotifications: Record<PrayerKey, boolean>;
   togglePrayerNotification: (key: PrayerKey) => void;
+  // Calculation method
+  calculationMethod: PrayerMethod;
+  setCalculationMethod: (method: PrayerMethod) => void;
   // Theme
   theme: ThemeMode;
   toggleTheme: () => void;
@@ -162,6 +167,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [prayerNotifications, setPrayerNotifications] = useState<Record<PrayerKey, boolean>>(
     DEFAULT_PRAYER_NOTIFICATIONS,
   );
+  const [calculationMethod, setCalculationMethodState] = useState<PrayerMethod>("UmmAlQura");
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [todayKey, setTodayKey] = useState<string>(todayKeyFor());
   const [useDeviceLocation, setUseDeviceLocation] = useState(false);
@@ -175,17 +181,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const [progRaw, tasRaw, cityRaw, notifRaw, prayNotifRaw, themeRaw, useLocRaw, devLocRaw] =
-          await Promise.all([
-            AsyncStorage.getItem(STORAGE_KEYS.progress),
-            AsyncStorage.getItem(STORAGE_KEYS.tasbih),
-            AsyncStorage.getItem(STORAGE_KEYS.city),
-            AsyncStorage.getItem(STORAGE_KEYS.notifications),
-            AsyncStorage.getItem(STORAGE_KEYS.prayerNotifications),
-            AsyncStorage.getItem(STORAGE_KEYS.theme),
-            AsyncStorage.getItem(STORAGE_KEYS.useDeviceLocation),
-            AsyncStorage.getItem(STORAGE_KEYS.deviceLocation),
-          ]);
+        const [
+          progRaw,
+          tasRaw,
+          cityRaw,
+          notifRaw,
+          prayNotifRaw,
+          calcMethodRaw,
+          themeRaw,
+          useLocRaw,
+          devLocRaw,
+        ] = await Promise.all([
+          AsyncStorage.getItem(STORAGE_KEYS.progress),
+          AsyncStorage.getItem(STORAGE_KEYS.tasbih),
+          AsyncStorage.getItem(STORAGE_KEYS.city),
+          AsyncStorage.getItem(STORAGE_KEYS.notifications),
+          AsyncStorage.getItem(STORAGE_KEYS.prayerNotifications),
+          AsyncStorage.getItem(STORAGE_KEYS.calculationMethod),
+          AsyncStorage.getItem(STORAGE_KEYS.theme),
+          AsyncStorage.getItem(STORAGE_KEYS.useDeviceLocation),
+          AsyncStorage.getItem(STORAGE_KEYS.deviceLocation),
+        ]);
         if (progRaw) {
           const parsed = JSON.parse(progRaw) as { date: string; data: ProgressMap };
           if (parsed.date === todayKeyFor()) {
@@ -205,6 +221,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           } catch {
             // ignore
           }
+        }
+        if (calcMethodRaw && (prayerMethods as string[]).includes(calcMethodRaw)) {
+          setCalculationMethodState(calcMethodRaw as PrayerMethod);
         }
         if (themeRaw === "dark" || themeRaw === "light") setTheme(themeRaw);
         if (useLocRaw === "true") setUseDeviceLocation(true);
@@ -428,6 +447,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const setCalculationMethod = useCallback((method: PrayerMethod) => {
+    setCalculationMethodState(method);
+    AsyncStorage.setItem(STORAGE_KEYS.calculationMethod, method).catch(() => {});
+  }, []);
+
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
       const next = prev === "dark" ? "light" : "dark";
@@ -463,6 +487,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     toggleNotifications,
     prayerNotifications,
     togglePrayerNotification,
+    calculationMethod,
+    setCalculationMethod,
     theme,
     toggleTheme,
   };
