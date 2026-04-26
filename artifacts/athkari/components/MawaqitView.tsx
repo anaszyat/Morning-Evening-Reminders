@@ -623,7 +623,8 @@ const styles = StyleSheet.create({
   archRow: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 10,
+    marginTop: 24,
+    marginBottom: -78,
   },
   heroCenter: {
     alignItems: "center",
