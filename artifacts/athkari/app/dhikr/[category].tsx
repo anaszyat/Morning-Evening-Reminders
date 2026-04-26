@@ -14,10 +14,147 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle } from "react-native-svg";
 
-import { StarPattern } from "@/components/StarPattern";
-import { getCategory, type Dhikr } from "@/constants/adhkar";
+import { getCategory, type AdhkarCategory, type Dhikr } from "@/constants/adhkar";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/hooks/useColors";
+
+type HeaderStyle = {
+  gradient: [string, string];
+  iconBg: string;
+  icon: keyof typeof Feather.glyphMap;
+  iconColor: string;
+  textColor: string;
+  subColor: string;
+  cornerColor: string;
+  cornerBg: string;
+  trackColor: string;
+};
+
+const HEADER_STYLES: Record<
+  AdhkarCategory["id"],
+  { light: HeaderStyle; dark: HeaderStyle }
+> = {
+  morning: {
+    light: {
+      gradient: ["#DBEAFE", "#93C5FD"],
+      iconBg: "#FEF3C7",
+      icon: "sunrise",
+      iconColor: "#F59E0B",
+      textColor: "#1E3A8A",
+      subColor: "#1E40AF",
+      cornerColor: "#1E3A8A",
+      cornerBg: "rgba(255,255,255,0.55)",
+      trackColor: "rgba(30,58,138,0.18)",
+    },
+    dark: {
+      gradient: ["#1E3A5F", "#0F2440"],
+      iconBg: "rgba(251,191,36,0.18)",
+      icon: "sunrise",
+      iconColor: "#FBBF24",
+      textColor: "#F8FAFC",
+      subColor: "#CBD5E1",
+      cornerColor: "#F8FAFC",
+      cornerBg: "rgba(255,255,255,0.12)",
+      trackColor: "rgba(255,255,255,0.18)",
+    },
+  },
+  evening: {
+    light: {
+      gradient: ["#A7F3D0", "#5EEAD4"],
+      iconBg: "#FED7AA",
+      icon: "sunset",
+      iconColor: "#EA580C",
+      textColor: "#134E4A",
+      subColor: "#0F766E",
+      cornerColor: "#134E4A",
+      cornerBg: "rgba(255,255,255,0.55)",
+      trackColor: "rgba(19,78,74,0.18)",
+    },
+    dark: {
+      gradient: ["#134E4A", "#042F2E"],
+      iconBg: "rgba(251,146,60,0.2)",
+      icon: "sunset",
+      iconColor: "#FB923C",
+      textColor: "#F8FAFC",
+      subColor: "#A7F3D0",
+      cornerColor: "#F8FAFC",
+      cornerBg: "rgba(255,255,255,0.12)",
+      trackColor: "rgba(255,255,255,0.18)",
+    },
+  },
+  prayer: {
+    light: {
+      gradient: ["#BBF7D0", "#86EFAC"],
+      iconBg: "#DCFCE7",
+      icon: "book-open",
+      iconColor: "#16A34A",
+      textColor: "#14532D",
+      subColor: "#166534",
+      cornerColor: "#14532D",
+      cornerBg: "rgba(255,255,255,0.55)",
+      trackColor: "rgba(20,83,45,0.18)",
+    },
+    dark: {
+      gradient: ["#064E3B", "#022C22"],
+      iconBg: "rgba(74,222,128,0.18)",
+      icon: "book-open",
+      iconColor: "#4ADE80",
+      textColor: "#F8FAFC",
+      subColor: "#BBF7D0",
+      cornerColor: "#F8FAFC",
+      cornerBg: "rgba(255,255,255,0.12)",
+      trackColor: "rgba(255,255,255,0.18)",
+    },
+  },
+  sleep: {
+    light: {
+      gradient: ["#1E3A8A", "#172554"],
+      iconBg: "rgba(255,255,255,0.18)",
+      icon: "moon",
+      iconColor: "#E0E7FF",
+      textColor: "#FFFFFF",
+      subColor: "rgba(255,255,255,0.8)",
+      cornerColor: "#FFFFFF",
+      cornerBg: "rgba(255,255,255,0.18)",
+      trackColor: "rgba(255,255,255,0.18)",
+    },
+    dark: {
+      gradient: ["#0F172A", "#020617"],
+      iconBg: "rgba(255,255,255,0.1)",
+      icon: "moon",
+      iconColor: "#E0E7FF",
+      textColor: "#FFFFFF",
+      subColor: "rgba(255,255,255,0.7)",
+      cornerColor: "#FFFFFF",
+      cornerBg: "rgba(255,255,255,0.12)",
+      trackColor: "rgba(255,255,255,0.18)",
+    },
+  },
+  wake: {
+    light: {
+      gradient: ["#FECACA", "#FCA5A5"],
+      iconBg: "#FEE2E2",
+      icon: "sun",
+      iconColor: "#DC2626",
+      textColor: "#7F1D1D",
+      subColor: "#991B1B",
+      cornerColor: "#7F1D1D",
+      cornerBg: "rgba(255,255,255,0.55)",
+      trackColor: "rgba(127,29,29,0.18)",
+    },
+    dark: {
+      gradient: ["#3F1818", "#1F0808"],
+      iconBg: "rgba(251,113,133,0.2)",
+      icon: "sun",
+      iconColor: "#FB7185",
+      textColor: "#F8FAFC",
+      subColor: "#FCA5A5",
+      cornerColor: "#F8FAFC",
+      cornerBg: "rgba(255,255,255,0.12)",
+      trackColor: "rgba(255,255,255,0.18)",
+    },
+  },
+};
 
 export default function CategoryScreen() {
   const { category: categoryParam } = useLocalSearchParams<{ category: string }>();
@@ -44,44 +181,39 @@ export default function CategoryScreen() {
   const total = category.items.length;
   const done = getCategoryCompletedCount(category.id);
   const percent = total ? Math.round((done / total) * 100) : 0;
+  const headerStyle = HEADER_STYLES[category.id][colors.mode];
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ headerTitle: "" }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + 20,
+          paddingTop: insets.top + 16,
           paddingBottom: 80,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.headerShadow}>
-          <LinearGradient
-            colors={["#1E40AF", "#1E3A8A", "#172554"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.heroCard}
-          >
-            <StarPattern color="#fff" opacity={0.06} />
-            <View style={styles.headerRow}>
+        <View style={styles.headerWrap}>
+          <View style={styles.headerShadow}>
+            <LinearGradient
+              colors={headerStyle.gradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.heroCard}
+            >
               <Pressable
                 onPress={() => router.back()}
                 hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="رجوع"
                 style={({ pressed }) => [
-                  styles.iconBtn,
-                  { backgroundColor: "rgba(255,255,255,0.18)", opacity: pressed ? 0.7 : 1 },
+                  styles.cornerBtn,
+                  styles.cornerRight,
+                  { backgroundColor: headerStyle.cornerBg, opacity: pressed ? 0.7 : 1 },
                 ]}
               >
-                <Feather name="chevron-right" size={20} color="#fff" />
+                <Feather name="chevron-right" size={20} color={headerStyle.cornerColor} />
               </Pressable>
-              <View style={styles.headerCenter}>
-                <Text style={[styles.heroTitle, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
-                  {category.title}
-                </Text>
-                <Text style={[styles.heroSub, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
-                  {category.subtitle}
-                </Text>
-              </View>
               <Pressable
                 onPress={() => {
                   if (Platform.OS !== "web") {
@@ -90,27 +222,71 @@ export default function CategoryScreen() {
                   resetCategory(category.id);
                 }}
                 hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="إعادة تعيين"
                 style={({ pressed }) => [
-                  styles.iconBtn,
-                  { backgroundColor: "rgba(255,255,255,0.18)", opacity: pressed ? 0.7 : 1 },
+                  styles.cornerBtn,
+                  styles.cornerLeft,
+                  { backgroundColor: headerStyle.cornerBg, opacity: pressed ? 0.7 : 1 },
                 ]}
               >
-                <Feather name="rotate-ccw" size={18} color="#fff" />
+                <Feather name="rotate-ccw" size={16} color={headerStyle.cornerColor} />
               </Pressable>
-            </View>
 
-            <View style={styles.progressRow}>
-              <Text style={[styles.percentText, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
-                {percent}%
-              </Text>
-              <View style={styles.barTrack}>
-                <View style={[styles.barFill, { width: `${percent}%` }]} />
+              <View style={styles.heroBody}>
+                <View style={styles.heroText}>
+                  <Text
+                    style={[
+                      styles.heroTitle,
+                      { color: headerStyle.textColor, fontFamily: "IBMPlexSansArabic_700Bold" },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {category.title}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.heroSub,
+                      { color: headerStyle.subColor, fontFamily: "IBMPlexSansArabic_400Regular" },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {category.subtitle}
+                  </Text>
+                </View>
+                <View style={[styles.heroIcon, { backgroundColor: headerStyle.iconBg }]}>
+                  <Feather name={headerStyle.icon} size={32} color={headerStyle.iconColor} />
+                </View>
               </View>
-              <Text style={[styles.progressText, { fontFamily: "IBMPlexSansArabic_500Medium" }]}>
-                {done} / {total}
-              </Text>
-            </View>
-          </LinearGradient>
+
+              <View style={styles.heroFooter}>
+                <Text
+                  style={[
+                    styles.heroFooterText,
+                    { color: headerStyle.subColor, fontFamily: "IBMPlexSansArabic_500Medium" },
+                  ]}
+                >
+                  {done} / {total}
+                </Text>
+                <View style={[styles.barTrack, { backgroundColor: headerStyle.trackColor }]}>
+                  <View
+                    style={[
+                      styles.barFill,
+                      { width: `${percent}%`, backgroundColor: headerStyle.iconColor },
+                    ]}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.heroFooterText,
+                    { color: headerStyle.textColor, fontFamily: "IBMPlexSansArabic_700Bold" },
+                  ]}
+                >
+                  {percent}%
+                </Text>
+              </View>
+            </LinearGradient>
+          </View>
         </View>
 
         <View style={styles.list}>
@@ -253,57 +429,89 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   errorText: { fontSize: 16 },
+  headerWrap: {
+    paddingHorizontal: 16,
+    alignItems: "center",
+  },
   headerShadow: {
-    marginHorizontal: 16,
-    borderRadius: 26,
-    shadowColor: "#1E3A8A",
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
+    width: "100%",
+    maxWidth: 420,
+    height: 120,
+    borderRadius: 24,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
     elevation: 4,
   },
   heroCard: {
-    borderRadius: 26,
-    paddingHorizontal: 18,
-    paddingVertical: 18,
+    flex: 1,
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 12,
     overflow: "hidden",
   },
-  headerRow: {
-    flexDirection: "row",
+  cornerBtn: {
+    position: "absolute",
+    top: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+  cornerRight: { right: 10 },
+  cornerLeft: { left: 10 },
+  heroBody: {
+    flex: 1,
+    flexDirection: "row-reverse",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
+    paddingHorizontal: 48,
   },
-  iconBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  heroText: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  heroTitle: {
+    fontSize: 20,
+    textAlign: "right",
+  },
+  heroSub: {
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: "right",
+  },
+  heroIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
-  headerCenter: { flex: 1, alignItems: "center" },
-  heroTitle: { color: "#fff", fontSize: 20 },
-  heroSub: { color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 4 },
-  progressRow: {
-    flexDirection: "row",
+  heroFooter: {
+    flexDirection: "row-reverse",
     alignItems: "center",
     gap: 10,
-    marginTop: 18,
-    backgroundColor: "rgba(0,0,0,0.18)",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 16,
   },
-  percentText: { color: "#93C5FD", fontSize: 14 },
+  heroFooterText: { fontSize: 11 },
   barTrack: {
     flex: 1,
-    height: 6,
-    backgroundColor: "rgba(255,255,255,0.18)",
+    height: 5,
     borderRadius: 99,
     overflow: "hidden",
+    position: "relative",
   },
-  barFill: { height: "100%", backgroundColor: "#93C5FD", borderRadius: 99 },
-  progressText: { color: "rgba(255,255,255,0.85)", fontSize: 12 },
+  barFill: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    right: 0,
+    borderRadius: 99,
+  },
   list: { marginTop: 18 },
   dhikrCard: {
     marginHorizontal: 16,
