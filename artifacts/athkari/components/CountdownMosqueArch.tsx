@@ -1,5 +1,5 @@
 import React from "react";
-import Svg, { Defs, Ellipse, LinearGradient, Path, Stop } from "react-native-svg";
+import Svg, { Ellipse, Path } from "react-native-svg";
 
 type Props = {
   width: number;
@@ -8,6 +8,7 @@ type Props = {
   progress: number;
   outlineColor?: string;
   traceColor?: string;
+  glowColor?: string;
   baseColor?: string;
   strokeWidth?: number;
 };
@@ -42,8 +43,9 @@ export function CountdownMosqueArch({
   width,
   height,
   progress,
-  outlineColor = "rgba(255,255,255,0.22)",
+  outlineColor = "rgba(255,255,255,0.18)",
   traceColor = "#ffffff",
+  glowColor = "#67E8F9",
   baseColor = "rgba(255,255,255,0.32)",
   strokeWidth = 4,
 }: Props) {
@@ -57,14 +59,7 @@ export function CountdownMosqueArch({
       viewBox={`0 0 ${VW} ${VH}`}
       pointerEvents="none"
     >
-      <Defs>
-        <LinearGradient id="archTraceGrad" x1="0" y1="1" x2="0" y2="0">
-          <Stop offset="0" stopColor={traceColor} stopOpacity="0.95" />
-          <Stop offset="1" stopColor={traceColor} stopOpacity="1" />
-        </LinearGradient>
-      </Defs>
-
-      {/* Soft outline of the full arch (always visible) */}
+      {/* Dim background arc */}
       <Path
         d={ARCH_PATH}
         stroke={outlineColor}
@@ -73,35 +68,35 @@ export function CountdownMosqueArch({
         strokeLinecap="round"
       />
 
-      {/* Bright depleting trace */}
+      {/* Bright depleting trace (dashoffset-driven CCW shrink) */}
       {visible > 0 && (
         <>
-          {/* outer soft glow */}
+          {/* outer cyan halo */}
           <Path
             d={ARCH_PATH}
-            stroke={traceColor}
-            strokeOpacity={0.25}
-            strokeWidth={strokeWidth + 12}
+            stroke={glowColor}
+            strokeOpacity={0.35}
+            strokeWidth={strokeWidth + 14}
             fill="none"
             strokeLinecap="round"
             pathLength={1}
             strokeDasharray={`${visible} 1`}
           />
-          {/* inner glow */}
+          {/* inner cyan glow */}
           <Path
             d={ARCH_PATH}
-            stroke={traceColor}
-            strokeOpacity={0.5}
-            strokeWidth={strokeWidth + 6}
+            stroke={glowColor}
+            strokeOpacity={0.65}
+            strokeWidth={strokeWidth + 7}
             fill="none"
             strokeLinecap="round"
             pathLength={1}
             strokeDasharray={`${visible} 1`}
           />
-          {/* main bright stroke */}
+          {/* white core */}
           <Path
             d={ARCH_PATH}
-            stroke="url(#archTraceGrad)"
+            stroke={traceColor}
             strokeWidth={strokeWidth + 1}
             fill="none"
             strokeLinecap="round"

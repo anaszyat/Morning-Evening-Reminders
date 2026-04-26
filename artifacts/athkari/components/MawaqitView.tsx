@@ -132,8 +132,9 @@ export function MawaqitView() {
               width={320}
               height={280}
               progress={remainingFraction}
-              outlineColor="rgba(255,255,255,0.22)"
-              traceColor="#6EE7B7"
+              outlineColor="rgba(255,255,255,0.18)"
+              traceColor="#ffffff"
+              glowColor="#67E8F9"
               baseColor="rgba(255,255,255,0.32)"
               strokeWidth={4}
             />
@@ -608,17 +609,24 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   countdownPill: {
-    backgroundColor: "rgba(15, 23, 80, 0.55)",
-    paddingHorizontal: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    paddingHorizontal: 24,
     paddingVertical: 10,
-    borderRadius: 18,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.22)",
   },
   countdown: {
     color: "#fff",
     fontSize: 28,
     fontWeight: "700",
     fontVariant: ["tabular-nums"],
-    letterSpacing: 1,
+    letterSpacing: 2,
+    fontFamily: Platform.select({
+      ios: "Menlo",
+      android: "monospace",
+      default: "ui-monospace, SFMono-Regular, Menlo, monospace",
+    }),
   },
   heroBottom: {
     flexDirection: "row",
