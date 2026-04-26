@@ -11,18 +11,17 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AppSplash } from "@/components/AppSplash";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { IslamicPatternBg } from "@/components/IslamicPatternBg";
 import { OnboardingPermissions } from "@/components/OnboardingPermissions";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 import colors from "@/constants/colors";
-
-const PATTERN = require("@/assets/images/islamic-pattern.png");
 
 const ONBOARDED_KEY = "athkari:onboarded:v1";
 
@@ -53,15 +52,7 @@ function ThemedStack() {
 
   return (
     <View style={[layoutStyles.root, { backgroundColor: palette.background }]}>
-      {/* Islamic pattern background */}
-      <Image
-        source={PATTERN}
-        style={[
-          layoutStyles.pattern,
-          { opacity: isDark ? 0.05 : 0.18, tintColor: isDark ? "#ffffff" : undefined },
-        ]}
-        resizeMode="repeat"
-      />
+      <IslamicPatternBg isDark={isDark} />
 
       <StatusBar style={isDark ? "light" : "dark"} />
       <Stack
@@ -93,15 +84,6 @@ function ThemedStack() {
 
 const layoutStyles = StyleSheet.create({
   root: { flex: 1 },
-  pattern: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: "100%",
-    height: "100%",
-  },
 });
 
 export default function RootLayout() {

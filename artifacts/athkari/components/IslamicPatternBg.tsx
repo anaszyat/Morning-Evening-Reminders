@@ -1,6 +1,6 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
-import Svg, { Defs, Pattern, Polygon, Rect } from "react-native-svg";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
+import Svg, { Defs, Pattern, Polygon, Line, Rect } from "react-native-svg";
 
 function starPoints(cx: number, cy: number, R: number, r: number): string {
   const pts: string[] = [];
@@ -19,16 +19,20 @@ function diamond(cx: number, cy: number, d: number): string {
 }
 
 type Props = {
-  color?: string;
-  opacity?: number;
+  isDark: boolean;
 };
 
-export function StarPattern({ color = "#ffffff", opacity = 0.08 }: Props) {
-  const T = 60;
-  const R = 9;
-  const r = 3.8;
-  const C = 6;
-  const sw = 0.6;
+export function IslamicPatternBg({ isDark }: Props) {
+  const { width, height } = useWindowDimensions();
+
+  const T = 80;
+  const R = 12;
+  const r = 5;
+  const C = 8;
+
+  const color = isDark ? "#c9a550" : "#1a6b55";
+  const opacity = isDark ? 0.11 : 0.14;
+  const sw = 0.75;
 
   const stars: [number, number][] = [
     [T / 2, T / 2],
@@ -50,10 +54,10 @@ export function StarPattern({ color = "#ffffff", opacity = 0.08 }: Props) {
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      <Svg width="100%" height="100%">
+      <Svg width={width} height={height}>
         <Defs>
           <Pattern
-            id="star-local"
+            id="islamic-bg"
             x="0"
             y="0"
             width={T}
@@ -80,7 +84,12 @@ export function StarPattern({ color = "#ffffff", opacity = 0.08 }: Props) {
             ))}
           </Pattern>
         </Defs>
-        <Rect width="100%" height="100%" fill="url(#star-local)" opacity={opacity} />
+        <Rect
+          width={width}
+          height={height}
+          fill="url(#islamic-bg)"
+          opacity={opacity}
+        />
       </Svg>
     </View>
   );
