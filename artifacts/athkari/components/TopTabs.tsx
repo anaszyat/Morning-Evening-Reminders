@@ -7,7 +7,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/hooks/useColors";
 
-export type TabKey = "athkar" | "mawaqit" | "tasbih";
+export type TabKey = "athkar" | "mawaqit" | "qibla" | "tasbih";
 
 export type TabDef = {
   key: TabKey;
@@ -18,6 +18,7 @@ export type TabDef = {
 export const TABS: TabDef[] = [
   { key: "athkar",  label: "الأذكار",  icon: "book-open" },
   { key: "tasbih",  label: "المسبحة",  icon: "star" },
+  { key: "qibla",   label: "القبلة",   icon: "compass" },
   { key: "mawaqit", label: "المواقيت", icon: "clock" },
 ];
 
@@ -46,7 +47,7 @@ export function TopTabs({ active, onChange, onSettingsPress, settingsActive }: P
         <Feather name={isDark ? "sun" : "moon"} size={18} color={colors.primary} />
       </Pressable>
 
-      {/* Center — 3-tab pill bar */}
+      {/* Center — 4-tab pill bar */}
       <View style={[styles.bar, { backgroundColor: colors.card, borderColor: colors.border }]}>
         {TABS.map((t) => {
           const isActive = !settingsActive && active === t.key;
@@ -143,10 +144,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
+    gap: 3,
     paddingVertical: 9,
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
     borderRadius: 16,
   },
-  label: { fontSize: 11 },
+  label: { fontSize: 10 },
 });
