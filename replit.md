@@ -18,6 +18,7 @@
 - **البوصلة**: تستخدم `expo-sensors` (Magnetometer) على iOS/Android، مع رسالة تنبيه على الويب.
 - **الخط**: IBM Plex Sans Arabic (400/500/600/700) من `@expo-google-fonts/ibm-plex-sans-arabic` — بديل مجاني هندسي قريب من Graphik.
 - **الثيم**: أزرق غامق `#1E40AF / #1E3A8A` مع تدرّجات ونمط نجوم خفيف.
+- **قوس المسجد العدّاد**: `components/CountdownMosqueArch.tsx` — SVG لقوس مدبّب يحيط بمحتوى البطاقة، مع خط تتبّع أبيض يبدأ من اليسار ويتقلّص مع اقتراب وقت الأذان (يستخدم `pathLength={1}` و `strokeDasharray`)، وثلاث قواعد بيضاوية تمثّل أعمدة المسجد.
 
 ## Workflows
 

@@ -13,8 +13,7 @@ import {
   View,
 } from "react-native";
 
-import { CountdownArc } from "@/components/CountdownArc";
-import { MosqueArches } from "@/components/MosqueArches";
+import { CountdownMosqueArch } from "@/components/CountdownMosqueArch";
 import { NotificationsModal } from "@/components/NotificationsModal";
 import { StarPattern } from "@/components/StarPattern";
 import { cities } from "@/constants/cities";
@@ -128,7 +127,17 @@ export function MawaqitView() {
           style={styles.hero}
         >
           <StarPattern color="#ffffff" opacity={0.04} />
-          <MosqueArches color="#ffffff" opacity={0.18} />
+          <View style={styles.archBackdrop} pointerEvents="none">
+            <CountdownMosqueArch
+              width={320}
+              height={280}
+              progress={remainingFraction}
+              outlineColor="rgba(255,255,255,0.22)"
+              traceColor="#ffffff"
+              baseColor="rgba(255,255,255,0.32)"
+              strokeWidth={4}
+            />
+          </View>
           <View style={styles.heroTop}>
             <Pressable
               onPress={() => {
@@ -175,25 +184,16 @@ export function MawaqitView() {
           </View>
 
           <View style={styles.heroCenter}>
-            <Text style={[styles.heroLabel, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
-              متبقي على الأذان
-            </Text>
             <Text style={[styles.heroPrayer, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
               {prayerLabels[next.key]}
             </Text>
-            <View style={styles.arcWrap}>
-              <CountdownArc
-                size={260}
-                strokeWidth={6}
-                progress={remainingFraction}
-                bgColor="rgba(255,255,255,0.28)"
-                fgColor="#FCD34D"
-              />
-              <View style={styles.arcCountWrap}>
-                <Text style={[styles.countdown, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
-                  {formatCountdown(remaining)}
-                </Text>
-              </View>
+            <Text style={[styles.heroLabel, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
+              متبقي على الأذان
+            </Text>
+            <View style={styles.countdownPill}>
+              <Text style={[styles.countdown, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+                {formatCountdown(remaining)}
+              </Text>
             </View>
           </View>
 
@@ -580,42 +580,38 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   cityText: { color: "#fff", fontSize: 13, flexShrink: 1 },
+  archBackdrop: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 56,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
   heroCenter: {
     alignItems: "center",
-    paddingTop: 24,
-    paddingBottom: 14,
-  },
-  heroLabel: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 12,
-    marginTop: 4,
+    paddingTop: 28,
+    paddingBottom: 24,
+    minHeight: 200,
   },
   heroPrayer: {
     color: "#fff",
-    fontSize: 38,
+    fontSize: 36,
     fontWeight: "700",
-    marginVertical: 6,
+    marginTop: 8,
   },
-  arcWrap: {
-    width: 260,
-    height: 140,
-    alignItems: "center",
-    justifyContent: "flex-start",
+  heroLabel: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 12,
     marginTop: 6,
-    position: "relative",
+    marginBottom: 14,
   },
-  arcCountWrap: {
-    position: "absolute",
-    top: 38,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.18)",
+  countdownPill: {
+    backgroundColor: "rgba(15, 23, 80, 0.55)",
     paddingHorizontal: 22,
     paddingVertical: 10,
-    borderRadius: 16,
-    alignSelf: "center",
-    marginHorizontal: 30,
+    borderRadius: 18,
   },
   countdown: {
     color: "#fff",
