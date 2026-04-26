@@ -464,7 +464,7 @@ export function StatsView({ onBack }: { onBack?: () => void }) {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={[sStyles.container, { backgroundColor: colors.background }]}
+      contentContainerStyle={[sStyles.container, { backgroundColor: "transparent" }]}
     >
       {onBack && (
         <Pressable

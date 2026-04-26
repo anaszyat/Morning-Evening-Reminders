@@ -32,7 +32,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background, paddingTop: topPad, paddingBottom: bottomPad }]}>
+    <View style={[styles.root, { backgroundColor: "transparent", paddingTop: topPad, paddingBottom: bottomPad }]}>
       <TopTabs
         active={tab}
         onChange={handleTabChange}
