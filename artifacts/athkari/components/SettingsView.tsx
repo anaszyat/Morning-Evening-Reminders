@@ -79,7 +79,7 @@ export function SettingsView({ onStatsPress }: { onStatsPress?: () => void }) {
 
   const handleContact = async () => {
     try {
-      await Linking.openURL("mailto:support@athkari.app?subject=دعم تطبيق أذكاري");
+      await Linking.openURL("mailto:anaszyat4@gmail.com?subject=دعم تطبيق أذكاري");
     } catch (_) {}
   };
 
@@ -156,7 +156,7 @@ export function SettingsView({ onStatsPress }: { onStatsPress?: () => void }) {
         icon="mail"
         iconColor="#10B981"
         label="تواصل معنا"
-        subLabel="support@athkari.app"
+        subLabel="anaszyat4@gmail.com"
         onPress={handleContact}
       />
 
