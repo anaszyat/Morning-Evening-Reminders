@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   ScrollView,
@@ -9,52 +9,15 @@ import {
 } from "react-native";
 import Svg, { Circle, G, Path, Rect, Text as SvgText } from "react-native-svg";
 
+import { tasbihPhrases } from "@/constants/tasbih";
+import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/hooks/useColors";
 
 const NAVY = "#1a2a6c";
 const CYAN = "#4fc3f7";
 const GOLD = "#f4c542";
 const GREEN = "#4caf50";
-const BG = "#eef2f8";
-
-const statsData = {
-  total: 12847,
-  streak: 14,
-  bestStreak: 21,
-  todaySessions: 3,
-  todayTotal: 450,
-  topDhikr: { name: "سبحان الله", count: 4230 },
-  weekly: [320, 450, 280, 600, 390, 500, 450],
-  breakdown: [
-    { name: "سبحان الله", count: 4230, color: CYAN },
-    { name: "الحمد لله", count: 3180, color: GOLD },
-    { name: "الله أكبر", count: 2890, color: NAVY },
-    { name: "لا إله إلا الله", count: 1547, color: GREEN },
-    { name: "أذكار أخرى", count: 1000, color: "#9E9E9E" },
-  ],
-  sessions: [
-    { dhikr: "سبحان الله", count: 100, duration: "3 دقائق", date: "اليوم 10:30 ص", done: true },
-    { dhikr: "الحمد لله", count: 100, duration: "4 دقائق", date: "اليوم 8:15 ص", done: true },
-    { dhikr: "الله أكبر", count: 67, duration: "2 دقيقة", date: "أمس 9:00 م", done: false },
-    { dhikr: "لا إله إلا الله", count: 100, duration: "6 دقائق", date: "أمس 7:30 م", done: true },
-    { dhikr: "سبحان الله", count: 100, duration: "3 دقائق", date: "الثلاثاء", done: true },
-  ],
-  heatmap: [
-    0, 120, 340, 80, 0, 210, 450, 600, 180, 300,
-    520, 0, 90, 400, 270, 0, 350, 480, 130, 0,
-    200, 310, 560, 0, 420, 180, 60, 300, 0, 450,
-  ],
-  goals: [
-    { name: "سبحان الله", target: 100, done: 78, color: CYAN },
-    { name: "الحمد لله", target: 100, done: 100, color: GOLD },
-    { name: "الله أكبر", target: 33, done: 20, color: NAVY },
-  ],
-  records: {
-    bestDay: { date: "الجمعة 15 رمضان", count: 1240 },
-    longestSession: { duration: "47 دقيقة", since: "منذ 3 أيام" },
-    bestMonth: { month: "رمضان 1446", count: 18300 },
-  },
-};
+const PHRASE_COLORS = [CYAN, GOLD, NAVY, GREEN, "#e57373", "#ab47bc"];
 
 const QUOTES = [
   { text: "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ", ref: "سورة الرعد: 28" },
@@ -63,6 +26,54 @@ const QUOTES = [
 ];
 
 const DAYS_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+
+const ARABIC_MONTHS: Record<number, string> = {
+  1: "يناير", 2: "فبراير", 3: "مارس", 4: "أبريل",
+  5: "مايو", 6: "يونيو", 7: "يوليو", 8: "أغسطس",
+  9: "سبتمبر", 10: "أكتوبر", 11: "نوفمبر", 12: "ديسمبر",
+};
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function dateKeyOffset(daysAgo: number) {
+  const d = new Date(Date.now() - daysAgo * 86_400_000);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatSessionDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    const today = new Date();
+    const yesterday = new Date(Date.now() - 86_400_000);
+    const dStr = (x: Date) => `${x.getFullYear()}-${x.getMonth()}-${x.getDate()}`;
+    if (dStr(d) === dStr(today)) {
+      return `اليوم ${d.toLocaleTimeString("ar", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+    if (dStr(d) === dStr(yesterday)) return "أمس";
+    return DAYS_AR[d.getDay()];
+  } catch {
+    return "";
+  }
+}
+
+function formatDuration(sec: number): string {
+  if (sec < 60) return `${sec} ث`;
+  const m = Math.floor(sec / 60);
+  if (m < 60) return `${m} دقيقة`;
+  return `${Math.floor(m / 60)} س ${m % 60} د`;
+}
+
+function formatMonthKey(ym: string): string {
+  try {
+    const [y, m] = ym.split("-");
+    return `${ARABIC_MONTHS[Number(m)] ?? m} ${y}`;
+  } catch {
+    return ym;
+  }
+}
 
 function useCountUp(target: number, duration = 1500) {
   const [value, setValue] = useState(0);
@@ -82,7 +93,7 @@ function useCountUp(target: number, duration = 1500) {
   return value;
 }
 
-function SectionTitle({ title, colors }: { title: string; colors: ReturnType<typeof useColors> }) {
+function SectionTitle({ title }: { title: string }) {
   return (
     <View style={sStyles.sectionTitleRow}>
       <View style={[sStyles.sectionAccent, { backgroundColor: GOLD }]} />
@@ -112,33 +123,30 @@ function HeroCard({
   );
 }
 
-function WeeklyChart({ colors }: { colors: ReturnType<typeof useColors> }) {
-  const data = statsData.weekly;
-  const max = Math.max(...data);
+function WeeklyChart({ data }: { data: { day: string; count: number; isToday: boolean }[] }) {
+  const max = Math.max(...data.map((d) => d.count), 1);
   const W = 340;
   const H = 150;
   const barW = 32;
   const gap = (W - data.length * barW) / (data.length + 1);
-  const todayIdx = new Date().getDay();
 
   return (
     <View style={sStyles.chartCard}>
       <View style={sStyles.navyCard}>
         <Svg width={W} height={H + 30}>
-          {data.map((v, i) => {
-            const barH = max > 0 ? (v / max) * H : 0;
+          {data.map((item, i) => {
+            const barH = (item.count / max) * H;
             const x = gap + i * (barW + gap);
             const y = H - barH;
-            const isToday = i === todayIdx;
             return (
               <G key={i}>
                 <Rect
                   x={x}
-                  y={y}
+                  y={y < H ? y : H - 1}
                   width={barW}
-                  height={barH}
+                  height={barH > 0 ? barH : 1}
                   rx={6}
-                  fill={isToday ? GOLD : CYAN}
+                  fill={item.isToday ? GOLD : CYAN}
                   opacity={0.9}
                 />
                 <SvgText
@@ -148,7 +156,7 @@ function WeeklyChart({ colors }: { colors: ReturnType<typeof useColors> }) {
                   fill="#CBD5E1"
                   textAnchor="middle"
                 >
-                  {DAYS_AR[i].slice(0, 3)}
+                  {item.day.slice(0, 3)}
                 </SvgText>
               </G>
             );
@@ -173,33 +181,43 @@ function donutSlice(cx: number, cy: number, outerR: number, innerR: number, star
   return `M ${s1.x} ${s1.y} A ${outerR} ${outerR} 0 ${large} 1 ${e1.x} ${e1.y} L ${s2.x} ${s2.y} A ${innerR} ${innerR} 0 ${large} 0 ${e2.x} ${e2.y} Z`;
 }
 
-function DonutChart() {
-  const data = statsData.breakdown;
-  const total = data.reduce((s, d) => s + d.count, 0);
+function DonutChart({ breakdown }: { breakdown: { name: string; count: number; color: string }[] }) {
+  const total = breakdown.reduce((s, d) => s + d.count, 0);
   const CX = 110;
   const CY = 110;
   const outerR = 90;
   const innerR = 58;
-  let currentAngle = -90;
 
+  if (total === 0) {
+    return (
+      <View style={[sStyles.donutWrap, { paddingVertical: 24 }]}>
+        <Text style={{ color: "#999", fontFamily: "IBMPlexSansArabic_400Regular", textAlign: "center" }}>
+          لا توجد بيانات بعد — ابدأ التسبيح!
+        </Text>
+      </View>
+    );
+  }
+
+  let currentAngle = -90;
   return (
     <View style={sStyles.donutWrap}>
       <Svg width={220} height={220}>
-        {data.map((item, i) => {
+        {breakdown.map((item, i) => {
+          if (item.count === 0) return null;
           const sweep = (item.count / total) * 360;
           const path = donutSlice(CX, CY, outerR, innerR, currentAngle, currentAngle + sweep - 1.5);
           currentAngle += sweep;
           return <Path key={i} d={path} fill={item.color} />;
         })}
-        <SvgText x={CX} y={CY - 10} textAnchor="middle" fontSize={22} fontWeight="bold" fill={NAVY}>
-          {(total / 1000).toFixed(1)}k
+        <SvgText x={CX} y={CY - 10} textAnchor="middle" fontSize={total >= 1000 ? 19 : 22} fontWeight="bold" fill={NAVY}>
+          {total >= 1000 ? `${(total / 1000).toFixed(1)}k` : total}
         </SvgText>
         <SvgText x={CX} y={CY + 14} textAnchor="middle" fontSize={11} fill="#666">
           ذكر إجمالي
         </SvgText>
       </Svg>
       <View style={sStyles.legend}>
-        {data.map((item, i) => (
+        {breakdown.filter((d) => d.count > 0).map((item, i) => (
           <View key={i} style={sStyles.legendRow}>
             <Text style={[sStyles.legendCount, { fontFamily: "IBMPlexSansArabic_500Medium", color: "#555" }]}>
               {item.count.toLocaleString()}
@@ -215,7 +233,17 @@ function DonutChart() {
   );
 }
 
-function SessionTable() {
+type SessionRow = {
+  id: string;
+  dhikr: string;
+  count: number;
+  durationSec: number;
+  date: string;
+  completedAt: string;
+  done: boolean;
+};
+
+function SessionTable({ sessions }: { sessions: SessionRow[] }) {
   const [filter, setFilter] = useState<"all" | "today" | "week" | "month">("all");
   const tabs = [
     { key: "all" as const, label: "الكل" },
@@ -223,9 +251,16 @@ function SessionTable() {
     { key: "week" as const, label: "الأسبوع" },
     { key: "month" as const, label: "الشهر" },
   ];
-  const filtered = statsData.sessions.filter((s) => {
-    if (filter === "today") return s.date.startsWith("اليوم");
-    if (filter === "week") return s.date.startsWith("اليوم") || s.date.startsWith("أمس") || s.date.startsWith("الثلاثاء");
+
+  const today = todayKey();
+  const weekAgo = dateKeyOffset(7);
+  const monthAgo = dateKeyOffset(30);
+
+  const filtered = sessions.filter((s) => {
+    const d = s.completedAt.slice(0, 10);
+    if (filter === "today") return d === today;
+    if (filter === "week") return d >= weekAgo;
+    if (filter === "month") return d >= monthAgo;
     return true;
   });
 
@@ -250,52 +285,56 @@ function SessionTable() {
           </TouchableOpacity>
         ))}
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={sStyles.table}>
-          <View style={[sStyles.tableRow, sStyles.tableHeader]}>
-            {["الذكر", "العدد", "المدة", "التاريخ", "الحالة"].map((h) => (
-              <Text key={h} style={[sStyles.thCell, { fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
-                {h}
-              </Text>
+      {filtered.length === 0 ? (
+        <Text style={{ color: "#999", textAlign: "center", fontFamily: "IBMPlexSansArabic_400Regular", paddingVertical: 16 }}>
+          لا توجد جلسات في هذه الفترة
+        </Text>
+      ) : (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={sStyles.table}>
+            <View style={[sStyles.tableRow, sStyles.tableHeader]}>
+              {["الذكر", "العدد", "المدة", "التاريخ", "الحالة"].map((h) => (
+                <Text key={h} style={[sStyles.thCell, { fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
+                  {h}
+                </Text>
+              ))}
+            </View>
+            {filtered.map((s, i) => (
+              <View key={s.id} style={[sStyles.tableRow, i % 2 === 0 ? sStyles.rowEven : sStyles.rowOdd]}>
+                <Text style={[sStyles.tdCell, { fontFamily: "IBMPlexSansArabic_500Medium", color: NAVY }]}>
+                  {s.dhikr}
+                </Text>
+                <Text style={[sStyles.tdCell, { fontFamily: "IBMPlexSansArabic_400Regular", color: "#333" }]}>
+                  {s.count}
+                </Text>
+                <Text style={[sStyles.tdCell, { fontFamily: "IBMPlexSansArabic_400Regular", color: "#333" }]}>
+                  {formatDuration(s.durationSec)}
+                </Text>
+                <Text style={[sStyles.tdCell, { fontFamily: "IBMPlexSansArabic_400Regular", color: "#666" }]}>
+                  {s.date}
+                </Text>
+                <View style={[sStyles.badge, { backgroundColor: s.done ? GREEN + "22" : "#9E9E9E22" }]}>
+                  <Text style={[sStyles.badgeText, { color: s.done ? GREEN : "#9E9E9E", fontFamily: "IBMPlexSansArabic_500Medium" }]}>
+                    {s.done ? "✅ مكتمل" : "⏸ غير مكتمل"}
+                  </Text>
+                </View>
+              </View>
             ))}
           </View>
-          {filtered.map((s, i) => (
-            <View key={i} style={[sStyles.tableRow, i % 2 === 0 ? sStyles.rowEven : sStyles.rowOdd]}>
-              <Text style={[sStyles.tdCell, { fontFamily: "IBMPlexSansArabic_500Medium", color: NAVY }]}>
-                {s.dhikr}
-              </Text>
-              <Text style={[sStyles.tdCell, { fontFamily: "IBMPlexSansArabic_400Regular", color: "#333" }]}>
-                {s.count}
-              </Text>
-              <Text style={[sStyles.tdCell, { fontFamily: "IBMPlexSansArabic_400Regular", color: "#333" }]}>
-                {s.duration}
-              </Text>
-              <Text style={[sStyles.tdCell, { fontFamily: "IBMPlexSansArabic_400Regular", color: "#666" }]}>
-                {s.date}
-              </Text>
-              <View style={[sStyles.badge, { backgroundColor: s.done ? GREEN + "22" : "#9E9E9E22" }]}>
-                <Text style={[sStyles.badgeText, { color: s.done ? GREEN : "#9E9E9E", fontFamily: "IBMPlexSansArabic_500Medium" }]}>
-                  {s.done ? "✅ مكتمل" : "⏸ غير مكتمل"}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </View>
   );
 }
 
-function Heatmap() {
-  const data = statsData.heatmap;
+function Heatmap({ data }: { data: number[] }) {
   function cellColor(v: number) {
     if (v === 0) return "#e0e0e0";
-    if (v <= 100) return "#b3e5fc";
-    if (v <= 300) return CYAN;
+    if (v <= 50) return "#b3e5fc";
+    if (v <= 200) return CYAN;
     if (v <= 500) return "#0288d1";
     return GOLD;
   }
-  const cols = 6;
   return (
     <View>
       <View style={sStyles.heatGrid}>
@@ -335,9 +374,90 @@ function AnimatedBar({ pct, color }: { pct: number; color: string }) {
 
 export function StatsView() {
   const colors = useColors();
-  const totalVal = useCountUp(statsData.total);
-  const todayTotal = useCountUp(statsData.todayTotal, 1200);
-  const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  const { lifetimeStats, tasbih } = useApp();
+  const quote = useMemo(() => QUOTES[Math.floor(Math.random() * QUOTES.length)], []);
+
+  const today = todayKey();
+
+  const totalVal = useCountUp(lifetimeStats.totalDhikr);
+  const todayCount = lifetimeStats.daily[today] ?? 0;
+  const todayCountAnim = useCountUp(todayCount, 1200);
+
+  const todaySessions = useMemo(
+    () => lifetimeStats.sessions.filter((s) => s.completedAt.slice(0, 10) === today).length,
+    [lifetimeStats.sessions, today],
+  );
+
+  const topDhikr = useMemo(() => {
+    let bestId = "";
+    let bestCount = 0;
+    for (const [id, count] of Object.entries(lifetimeStats.tasbihLifetime)) {
+      if (count > bestCount) { bestCount = count; bestId = id; }
+    }
+    const phrase = tasbihPhrases.find((p) => p.id === bestId);
+    return phrase ? { name: phrase.short, count: bestCount } : null;
+  }, [lifetimeStats.tasbihLifetime]);
+
+  const weeklyData = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const daysAgo = 6 - i;
+      const key = dateKeyOffset(daysAgo);
+      const date = new Date(Date.now() - daysAgo * 86_400_000);
+      return {
+        day: DAYS_AR[date.getDay()],
+        count: lifetimeStats.daily[key] ?? 0,
+        isToday: daysAgo === 0,
+      };
+    });
+  }, [lifetimeStats.daily]);
+
+  const breakdown = useMemo(() => {
+    const tasbihTotal = tasbihPhrases.reduce(
+      (s, p) => s + (lifetimeStats.tasbihLifetime[p.id] ?? 0), 0,
+    );
+    const other = Math.max(0, lifetimeStats.totalDhikr - tasbihTotal);
+    const items = tasbihPhrases.map((p, i) => ({
+      name: p.short,
+      count: lifetimeStats.tasbihLifetime[p.id] ?? 0,
+      color: PHRASE_COLORS[i] ?? "#9E9E9E",
+    }));
+    if (other > 0) {
+      items.push({ name: "أذكار أخرى", count: other, color: "#9E9E9E" });
+    }
+    return items;
+  }, [lifetimeStats.tasbihLifetime, lifetimeStats.totalDhikr]);
+
+  const sessionRows = useMemo<SessionRow[]>(
+    () =>
+      lifetimeStats.sessions.map((s) => ({
+        id: s.id,
+        dhikr: s.phraseName,
+        count: s.count,
+        durationSec: s.durationSec,
+        date: formatSessionDate(s.completedAt),
+        completedAt: s.completedAt,
+        done: s.completed,
+      })),
+    [lifetimeStats.sessions],
+  );
+
+  const heatmapData = useMemo(
+    () => Array.from({ length: 30 }, (_, i) => lifetimeStats.daily[dateKeyOffset(29 - i)] ?? 0),
+    [lifetimeStats.daily],
+  );
+
+  const goals = useMemo(
+    () =>
+      tasbihPhrases.slice(0, 3).map((p, i) => ({
+        name: p.short,
+        target: p.target,
+        done: tasbih[p.id] ?? 0,
+        color: PHRASE_COLORS[i],
+      })),
+    [tasbih],
+  );
+
+  const { bestDay, longestSession, bestMonth } = lifetimeStats.records;
 
   return (
     <ScrollView
@@ -361,88 +481,88 @@ export function StatsView() {
         <HeroCard
           icon="🔥"
           label="أيام متواصلة"
-          value={`${statsData.streak}`}
-          subtext={`أعلى سلسلة: ${statsData.bestStreak} يوم`}
+          value={`${lifetimeStats.streak}`}
+          subtext={`أعلى سلسلة: ${lifetimeStats.bestStreak} يوم`}
           accent={GOLD}
         />
         <HeroCard
           icon="☀️"
           label="جلسات اليوم"
-          value={`${statsData.todaySessions}`}
-          subtext={`إجمالي اليوم: ${todayTotal}`}
+          value={`${todaySessions}`}
+          subtext={`إجمالي اليوم: ${todayCountAnim.toLocaleString()}`}
           accent={GREEN}
         />
         <HeroCard
           icon="⭐"
           label="أكثر ذكر"
-          value={statsData.topDhikr.name}
-          subtext={`${statsData.topDhikr.count.toLocaleString()} مرة`}
+          value={topDhikr ? topDhikr.name : "—"}
+          subtext={topDhikr ? `${topDhikr.count.toLocaleString()} مرة` : "ابدأ التسبيح!"}
           accent={NAVY}
         />
       </View>
 
       {/* SECTION 2: Weekly Chart */}
-      <SectionTitle title="نشاط الأسبوع" colors={colors} />
-      <WeeklyChart colors={colors} />
+      <SectionTitle title="نشاط الأسبوع" />
+      <WeeklyChart data={weeklyData} />
 
       {/* SECTION 3: Donut Chart */}
-      <SectionTitle title="توزيع الأذكار" colors={colors} />
+      <SectionTitle title="توزيع الأذكار" />
       <View style={sStyles.whiteCard}>
-        <DonutChart />
+        <DonutChart breakdown={breakdown} />
       </View>
 
       {/* SECTION 4: Session Table */}
-      <SectionTitle title="سجل جلسات المسبحة" colors={colors} />
+      <SectionTitle title="سجل جلسات المسبحة" />
       <View style={sStyles.whiteCard}>
-        <SessionTable />
+        <SessionTable sessions={sessionRows} />
       </View>
 
       {/* SECTION 5: Heatmap */}
-      <SectionTitle title="خريطة النشاط الشهري" colors={colors} />
+      <SectionTitle title="خريطة النشاط الشهري" />
       <View style={sStyles.whiteCard}>
-        <Heatmap />
+        <Heatmap data={heatmapData} />
       </View>
 
       {/* SECTION 6: Records */}
-      <SectionTitle title="أرقامي القياسية" colors={colors} />
+      <SectionTitle title="أرقامي القياسية" />
       <View style={sStyles.recordsRow}>
         <View style={[sStyles.recordCard, { backgroundColor: NAVY }]}>
           <Text style={sStyles.recordIcon}>🏆</Text>
           <Text style={[sStyles.recordLabel, { fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>أفضل يوم</Text>
           <Text style={[sStyles.recordVal, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
-            {statsData.records.bestDay.count.toLocaleString()} ذكر
+            {bestDay ? `${bestDay.count.toLocaleString()} ذكر` : "—"}
           </Text>
           <Text style={[sStyles.recordSub, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
-            {statsData.records.bestDay.date}
+            {bestDay ? bestDay.date : "لم يُسجَّل بعد"}
           </Text>
         </View>
         <View style={[sStyles.recordCard, { backgroundColor: NAVY }]}>
           <Text style={sStyles.recordIcon}>⚡</Text>
           <Text style={[sStyles.recordLabel, { fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>أطول جلسة</Text>
           <Text style={[sStyles.recordVal, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
-            {statsData.records.longestSession.duration}
+            {longestSession ? formatDuration(longestSession.durationSec) : "—"}
           </Text>
           <Text style={[sStyles.recordSub, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
-            {statsData.records.longestSession.since}
+            {longestSession ? formatSessionDate(longestSession.date) : "لم يُسجَّل بعد"}
           </Text>
         </View>
         <View style={[sStyles.recordCard, { backgroundColor: NAVY }]}>
           <Text style={sStyles.recordIcon}>📅</Text>
           <Text style={[sStyles.recordLabel, { fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>أكثر شهر</Text>
           <Text style={[sStyles.recordVal, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
-            {(statsData.records.bestMonth.count / 1000).toFixed(1)}k ذكر
+            {bestMonth ? (bestMonth.count >= 1000 ? `${(bestMonth.count / 1000).toFixed(1)}k ذكر` : `${bestMonth.count} ذكر`) : "—"}
           </Text>
           <Text style={[sStyles.recordSub, { fontFamily: "IBMPlexSansArabic_400Regular" }]}>
-            {statsData.records.bestMonth.month}
+            {bestMonth ? formatMonthKey(bestMonth.month) : "لم يُسجَّل بعد"}
           </Text>
         </View>
       </View>
 
       {/* SECTION 7: Goals */}
-      <SectionTitle title="أهدافي اليومية" colors={colors} />
+      <SectionTitle title="أهدافي اليومية" />
       <View style={sStyles.whiteCard}>
-        {statsData.goals.map((g, i) => {
-          const pct = Math.round((g.done / g.target) * 100);
+        {goals.map((g, i) => {
+          const pct = Math.round((Math.min(g.done, g.target) / g.target) * 100);
           return (
             <View key={i} style={sStyles.goalRow}>
               <View style={sStyles.goalHeader}>

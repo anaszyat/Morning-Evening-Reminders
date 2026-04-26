@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -18,11 +18,12 @@ import { useColors } from "@/hooks/useColors";
 
 export function TasbihView() {
   const colors = useColors();
-  const { tasbih, totalTasbih, incrementTasbih, resetTasbih } = useApp();
+  const { tasbih, totalTasbih, incrementTasbih, resetTasbih, logTasbihSession } = useApp();
   const [activeId, setActiveId] = useState<string>(tasbihPhrases[0].id);
   const active = tasbihPhrases.find((p) => p.id === activeId)!;
   const count = tasbih[active.id] ?? 0;
   const percent = Math.min(100, Math.round((count / active.target) * 100));
+  const sessionStartRef = useRef<number | null>(null);
 
   const ringSize = 230;
   const stroke = 10;
@@ -30,9 +31,29 @@ export function TasbihView() {
   const c = 2 * Math.PI * r;
   const offset = c - (percent / 100) * c;
 
+  const doLogSession = (phraseId: string, currentCount: number) => {
+    const phrase = tasbihPhrases.find((p) => p.id === phraseId);
+    if (!phrase || currentCount === 0) return;
+    const startMs = sessionStartRef.current ?? Date.now();
+    const durationSec = Math.round((Date.now() - startMs) / 1000);
+    logTasbihSession({
+      phraseId,
+      phraseName: phrase.short,
+      count: currentCount,
+      target: phrase.target,
+      durationSec,
+      completedAt: new Date().toISOString(),
+      completed: currentCount >= phrase.target,
+    });
+    sessionStartRef.current = null;
+  };
+
   const onTap = () => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    }
+    if (sessionStartRef.current === null) {
+      sessionStartRef.current = Date.now();
     }
     incrementTasbih(active.id);
   };
@@ -57,6 +78,7 @@ export function TasbihView() {
                 if (Platform.OS !== "web") {
                   Haptics.selectionAsync().catch(() => {});
                 }
+                doLogSession(activeId, tasbih[activeId] ?? 0);
                 setActiveId(p.id);
               }}
               style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
@@ -155,6 +177,7 @@ export function TasbihView() {
               if (Platform.OS !== "web") {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
               }
+              doLogSession(active.id, count);
               resetTasbih(active.id);
             }}
             style={({ pressed }) => [

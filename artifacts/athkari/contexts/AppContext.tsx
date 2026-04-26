@@ -26,6 +26,44 @@ const STORAGE_KEYS = {
   theme: "athkari:theme:v1",
   useDeviceLocation: "athkari:useDeviceLocation:v1",
   deviceLocation: "athkari:deviceLocation:v1",
+  lifetimeStats: "athkari:lifetime:v1",
+};
+
+export type TasbihSession = {
+  id: string;
+  phraseId: string;
+  phraseName: string;
+  count: number;
+  target: number;
+  durationSec: number;
+  completedAt: string;
+  completed: boolean;
+};
+
+export type LifetimeStats = {
+  totalDhikr: number;
+  streak: number;
+  bestStreak: number;
+  lastActiveDate: string;
+  daily: Record<string, number>;
+  tasbihLifetime: Record<string, number>;
+  sessions: TasbihSession[];
+  records: {
+    bestDay: { date: string; count: number } | null;
+    longestSession: { durationSec: number; date: string } | null;
+    bestMonth: { month: string; count: number } | null;
+  };
+};
+
+const DEFAULT_LIFETIME_STATS: LifetimeStats = {
+  totalDhikr: 0,
+  streak: 0,
+  bestStreak: 0,
+  lastActiveDate: "",
+  daily: {},
+  tasbihLifetime: {},
+  sessions: [],
+  records: { bestDay: null, longestSession: null, bestMonth: null },
 };
 
 const DEFAULT_PRAYER_NOTIFICATIONS: Record<PrayerKey, boolean> = {
@@ -93,6 +131,9 @@ type AppContextValue = {
   // Theme
   theme: ThemeMode;
   toggleTheme: () => void;
+  // Lifetime Stats
+  lifetimeStats: LifetimeStats;
+  logTasbihSession: (session: Omit<TasbihSession, "id">) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -176,6 +217,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     "idle" | "requesting" | "granted" | "denied" | "error"
   >("idle");
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [lifetimeStats, setLifetimeStats] = useState<LifetimeStats>(DEFAULT_LIFETIME_STATS);
 
   // Load persisted state
   useEffect(() => {
@@ -191,6 +233,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           themeRaw,
           useLocRaw,
           devLocRaw,
+          lifeRaw,
         ] = await Promise.all([
           AsyncStorage.getItem(STORAGE_KEYS.progress),
           AsyncStorage.getItem(STORAGE_KEYS.tasbih),
@@ -201,6 +244,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           AsyncStorage.getItem(STORAGE_KEYS.theme),
           AsyncStorage.getItem(STORAGE_KEYS.useDeviceLocation),
           AsyncStorage.getItem(STORAGE_KEYS.deviceLocation),
+          AsyncStorage.getItem(STORAGE_KEYS.lifetimeStats),
         ]);
         if (progRaw) {
           const parsed = JSON.parse(progRaw) as { date: string; data: ProgressMap };
@@ -242,6 +286,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             // ignore
           }
         }
+        if (lifeRaw) {
+          try {
+            const parsed = JSON.parse(lifeRaw) as LifetimeStats;
+            setLifetimeStats({ ...DEFAULT_LIFETIME_STATS, ...parsed });
+          } catch {
+            // ignore
+          }
+        }
       } catch {
         // ignore storage errors
       } finally {
@@ -278,6 +330,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (current >= target) return prev;
         const next = { ...prev, [key]: current + 1 };
         persistProgress(next);
+        setLifetimeStats((ls) => {
+          const today = todayKeyFor();
+          const newDailyCount = (ls.daily[today] ?? 0) + 1;
+          const updatedDaily = { ...ls.daily, [today]: newDailyCount };
+          const totalDhikr = ls.totalDhikr + 1;
+          let streak = ls.streak;
+          let bestStreak = ls.bestStreak;
+          let lastActiveDate = ls.lastActiveDate;
+          if (lastActiveDate !== today) {
+            const yesterday = todayKeyFor(new Date(Date.now() - 86_400_000));
+            streak = lastActiveDate === yesterday ? streak + 1 : 1;
+            lastActiveDate = today;
+            if (streak > bestStreak) bestStreak = streak;
+          }
+          let bestDay = ls.records.bestDay;
+          if (!bestDay || newDailyCount > bestDay.count) {
+            bestDay = { date: today, count: newDailyCount };
+          }
+          const monthKey = today.slice(0, 7);
+          const monthTotal = Object.entries(updatedDaily)
+            .filter(([d]) => d.startsWith(monthKey))
+            .reduce((s, [, c]) => s + c, 0);
+          let bestMonth = ls.records.bestMonth;
+          if (!bestMonth || monthTotal > bestMonth.count) {
+            bestMonth = { month: monthKey, count: monthTotal };
+          }
+          const cutoff = todayKeyFor(new Date(Date.now() - 60 * 86_400_000));
+          const prunedDaily: Record<string, number> = {};
+          for (const [d, c] of Object.entries(updatedDaily)) {
+            if (d >= cutoff) prunedDaily[d] = c;
+          }
+          const updated: LifetimeStats = {
+            ...ls,
+            totalDhikr,
+            streak,
+            bestStreak,
+            lastActiveDate,
+            daily: prunedDaily,
+            records: { ...ls.records, bestDay, bestMonth },
+          };
+          AsyncStorage.setItem(STORAGE_KEYS.lifetimeStats, JSON.stringify(updated)).catch(() => {});
+          return updated;
+        });
         return next;
       });
     },
@@ -332,6 +427,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTasbih((prev) => {
       const next = { ...prev, [id]: (prev[id] ?? 0) + 1 };
       AsyncStorage.setItem(STORAGE_KEYS.tasbih, JSON.stringify(next)).catch(() => {});
+      setLifetimeStats((ls) => {
+        const updated: LifetimeStats = {
+          ...ls,
+          tasbihLifetime: {
+            ...ls.tasbihLifetime,
+            [id]: (ls.tasbihLifetime[id] ?? 0) + 1,
+          },
+        };
+        AsyncStorage.setItem(STORAGE_KEYS.lifetimeStats, JSON.stringify(updated)).catch(() => {});
+        return updated;
+      });
       return next;
     });
   }, []);
@@ -460,6 +566,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const logTasbihSession = useCallback((session: Omit<TasbihSession, "id">) => {
+    if (session.count === 0) return;
+    setLifetimeStats((ls) => {
+      const newSession: TasbihSession = { ...session, id: `${Date.now()}-${Math.random()}` };
+      const sessions = [newSession, ...ls.sessions].slice(0, 200);
+      let longestSession = ls.records.longestSession;
+      if (!longestSession || session.durationSec > longestSession.durationSec) {
+        longestSession = { durationSec: session.durationSec, date: session.completedAt };
+      }
+      const updated: LifetimeStats = {
+        ...ls,
+        sessions,
+        records: { ...ls.records, longestSession },
+      };
+      AsyncStorage.setItem(STORAGE_KEYS.lifetimeStats, JSON.stringify(updated)).catch(() => {});
+      return updated;
+    });
+  }, []);
+
   const value: AppContextValue = {
     loaded,
     progress,
@@ -491,6 +616,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCalculationMethod,
     theme,
     toggleTheme,
+    lifetimeStats,
+    logTasbihSession,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
