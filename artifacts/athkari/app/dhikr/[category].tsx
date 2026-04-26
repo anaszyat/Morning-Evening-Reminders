@@ -194,7 +194,7 @@ export default function CategoryScreen() {
 
   if (!category) {
     return (
-      <View style={[styles.center, { backgroundColor: "transparent" }]}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
         <Text style={[styles.errorText, { color: colors.foreground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
           الفئة غير موجودة
         </Text>
@@ -208,7 +208,7 @@ export default function CategoryScreen() {
   const headerStyle = HEADER_STYLES[category.id][colors.mode];
 
   return (
-    <View style={[styles.root, { backgroundColor: "transparent" }]}>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView
         contentContainerStyle={{

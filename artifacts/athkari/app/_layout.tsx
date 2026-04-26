@@ -18,7 +18,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AppSplash } from "@/components/AppSplash";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { IslamicPatternBg } from "@/components/IslamicPatternBg";
 import { OnboardingPermissions } from "@/components/OnboardingPermissions";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 import colors from "@/constants/colors";
@@ -52,16 +51,14 @@ function ThemedStack() {
 
   return (
     <View style={[layoutStyles.root, { backgroundColor: palette.background }]}>
-      <IslamicPatternBg isDark={isDark} />
-
       <StatusBar style={isDark ? "light" : "dark"} />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: "transparent" },
+          headerStyle: { backgroundColor: palette.background },
           headerTintColor: palette.foreground,
           headerTitleStyle: { fontFamily: "IBMPlexSansArabic_700Bold" },
           headerBackTitle: "رجوع",
-          contentStyle: { backgroundColor: "transparent" },
+          contentStyle: { backgroundColor: palette.background },
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
