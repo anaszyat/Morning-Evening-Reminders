@@ -133,7 +133,7 @@ export function MawaqitView() {
               height={280}
               progress={remainingFraction}
               outlineColor="rgba(255,255,255,0.22)"
-              traceColor="#ffffff"
+              traceColor="#6EE7B7"
               baseColor="rgba(255,255,255,0.32)"
               strokeWidth={4}
             />

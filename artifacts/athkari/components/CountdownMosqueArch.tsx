@@ -16,21 +16,18 @@ const VW = 320;
 const VH = 280;
 
 // Arch geometry within the viewBox
-const ARCH_LEFT = 38;
-const ARCH_RIGHT = VW - ARCH_LEFT; // 282
+const ARCH_LEFT = 30;
+const ARCH_RIGHT = VW - ARCH_LEFT; // 290
 const ARCH_BOTTOM = 240;
-const ARCH_APEX_Y = 38;
+const ARCH_RADIUS = (ARCH_RIGHT - ARCH_LEFT) / 2; // 130
 const APEX_X = VW / 2;
 
-// Each side is a single cubic Bézier from base → apex
-// Path drawn from bottom-LEFT, up to APEX, then down to bottom-RIGHT
-// so the depleting trace shrinks from the right end first.
+// Round (semicircle) arch from bottom-LEFT, up over the top, to bottom-RIGHT.
+// As the depleting trace shrinks, the right-end portion disappears first
+// leaving the left side visible (matches reference imagery).
 const ARCH_PATH = [
   `M ${ARCH_LEFT} ${ARCH_BOTTOM}`,
-  // Left side up to apex (vertical at base, curving inward toward apex)
-  `C ${ARCH_LEFT} ${ARCH_BOTTOM - 130}, ${APEX_X - 50} ${ARCH_APEX_Y + 30}, ${APEX_X} ${ARCH_APEX_Y}`,
-  // Right side down from apex (curving outward, vertical at base)
-  `C ${APEX_X + 50} ${ARCH_APEX_Y + 30}, ${ARCH_RIGHT} ${ARCH_BOTTOM - 130}, ${ARCH_RIGHT} ${ARCH_BOTTOM}`,
+  `A ${ARCH_RADIUS} ${ARCH_RADIUS} 0 0 1 ${ARCH_RIGHT} ${ARCH_BOTTOM}`,
 ].join(" ");
 
 const PILLAR_Y = ARCH_BOTTOM + 14;
@@ -79,11 +76,22 @@ export function CountdownMosqueArch({
       {/* Bright depleting trace */}
       {visible > 0 && (
         <>
-          {/* glow halo */}
+          {/* outer soft glow */}
           <Path
             d={ARCH_PATH}
             stroke={traceColor}
-            strokeOpacity={0.35}
+            strokeOpacity={0.25}
+            strokeWidth={strokeWidth + 12}
+            fill="none"
+            strokeLinecap="round"
+            pathLength={1}
+            strokeDasharray={`${visible} 1`}
+          />
+          {/* inner glow */}
+          <Path
+            d={ARCH_PATH}
+            stroke={traceColor}
+            strokeOpacity={0.5}
             strokeWidth={strokeWidth + 6}
             fill="none"
             strokeLinecap="round"
