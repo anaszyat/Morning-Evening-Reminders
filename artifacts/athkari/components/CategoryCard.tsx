@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
     borderRadius: 22,
     borderWidth: 1,
     shadowColor: "#0F172A",
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
-    minHeight: 158,
+    minHeight: 138,
   },
   iconWrap: {
     width: 44,

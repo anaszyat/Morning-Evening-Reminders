@@ -68,14 +68,14 @@ export function TopTabs({ active, onChange, onSettingsPress, settingsActive }: P
                     end={{ x: 1, y: 1 }}
                     style={[styles.chip, { opacity: pressed ? 0.9 : 1 }]}
                   >
-                    <Feather name={t.icon} size={14} color="#fff" />
+                    <Feather name={t.icon} size={16} color="#fff" />
                     <Text style={[styles.label, { color: "#fff", fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
                       {t.label}
                     </Text>
                   </LinearGradient>
                 ) : (
                   <View style={[styles.chip, { opacity: pressed ? 0.7 : 1 }]}>
-                    <Feather name={t.icon} size={14} color={colors.mutedForeground} />
+                    <Feather name={t.icon} size={16} color={colors.mutedForeground} />
                     <Text style={[styles.label, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_500Medium" }]}>
                       {t.label}
                     </Text>
@@ -145,9 +145,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 3,
-    paddingVertical: 9,
+    paddingVertical: 11,
     paddingHorizontal: 2,
     borderRadius: 16,
   },
-  label: { fontSize: 10 },
+  label: { fontSize: 11 },
 });
