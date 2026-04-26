@@ -8,8 +8,8 @@ import { useApp } from "@/contexts/AppContext";
 
 export function HeroProgress() {
   const { totalCompletedToday, totalAdhkar, overallPercent } = useApp();
-  const size = 110;
-  const stroke = 8;
+  const size = 94;
+  const stroke = 7;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (overallPercent / 100) * c;
@@ -88,8 +88,8 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 26,
-    paddingHorizontal: 22,
-    paddingVertical: 24,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
     overflow: "hidden",
   },
   row: {
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
   headline: {
     color: "#fff",
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: "700",
     textAlign: "right",
     marginBottom: 8,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   percent: {
     color: "#fff",
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: "700",
   },
   percentLabel: {

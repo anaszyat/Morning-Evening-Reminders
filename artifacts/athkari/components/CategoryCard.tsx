@@ -55,7 +55,7 @@ export function CategoryCard({ category, onPress }: Props) {
         end={{ x: 1, y: 1 }}
         style={styles.iconWrap}
       >
-        <Feather name={meta.icon} size={26} color="#fff" />
+        <Feather name={meta.icon} size={22} color="#fff" />
       </LinearGradient>
 
       <Text
@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
     borderRadius: 22,
     borderWidth: 1,
     shadowColor: "#0F172A",
@@ -109,12 +109,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
-    minHeight: 180,
+    minHeight: 158,
   },
   iconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#1E3A8A",
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 2,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   title: {
     fontSize: 15,
