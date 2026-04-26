@@ -46,7 +46,7 @@ function SettingRow({ icon, iconColor, label, subLabel, right, onPress }: RowPro
   );
 }
 
-export function SettingsView() {
+export function SettingsView({ onStatsPress }: { onStatsPress?: () => void }) {
   const colors = useColors();
   const { theme, toggleTheme } = useApp();
   const isDark = theme === "dark";
@@ -131,6 +131,13 @@ export function SettingsView() {
         التطبيق
       </Text>
 
+      <SettingRow
+        icon="bar-chart-2"
+        iconColor="#1a2a6c"
+        label="إحصائياتي"
+        subLabel="تتبع رحلتك وأرقامك القياسية"
+        onPress={onStatsPress}
+      />
       <SettingRow
         icon="share-2"
         iconColor="#0EA5E9"

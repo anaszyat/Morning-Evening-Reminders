@@ -1,6 +1,8 @@
+import { Feather } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -372,7 +374,7 @@ function AnimatedBar({ pct, color }: { pct: number; color: string }) {
   );
 }
 
-export function StatsView() {
+export function StatsView({ onBack }: { onBack?: () => void }) {
   const colors = useColors();
   const { lifetimeStats, tasbih } = useApp();
   const quote = useMemo(() => QUOTES[Math.floor(Math.random() * QUOTES.length)], []);
@@ -464,6 +466,17 @@ export function StatsView() {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[sStyles.container, { backgroundColor: colors.background }]}
     >
+      {onBack && (
+        <Pressable
+          onPress={onBack}
+          style={({ pressed }) => [sStyles.backBtn, { opacity: pressed ? 0.7 : 1 }]}
+        >
+          <Feather name="chevron-right" size={20} color={NAVY} />
+          <Text style={[sStyles.backLabel, { color: NAVY, fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
+            الإعدادات
+          </Text>
+        </Pressable>
+      )}
       <Text style={[sStyles.pageTitle, { color: NAVY, fontFamily: "IBMPlexSansArabic_700Bold" }]}>إحصائياتي</Text>
       <Text style={[sStyles.pageSub, { color: "#666", fontFamily: "IBMPlexSansArabic_400Regular" }]}>
         تتبع رحلتك الروحية
@@ -727,4 +740,7 @@ const sStyles = StyleSheet.create({
   footerStar: { fontSize: 28 },
   footerText: { color: "#fff", fontSize: 16, textAlign: "center", lineHeight: 28 },
   footerRef: { color: GOLD, fontSize: 13 },
+
+  backBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingVertical: 8, marginBottom: 4 },
+  backLabel: { fontSize: 14 },
 });
