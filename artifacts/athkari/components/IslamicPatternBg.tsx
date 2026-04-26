@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
-import Svg, { Defs, Pattern, Polygon, Line, Rect } from "react-native-svg";
+import Svg, { G, Polygon } from "react-native-svg";
 
 function starPoints(cx: number, cy: number, R: number, r: number): string {
   const pts: string[] = [];
@@ -8,13 +8,13 @@ function starPoints(cx: number, cy: number, R: number, r: number): string {
     const a = (i * Math.PI) / 8 - Math.PI / 2;
     const radius = i % 2 === 0 ? R : r;
     pts.push(
-      `${(cx + radius * Math.cos(a)).toFixed(3)},${(cy + radius * Math.sin(a)).toFixed(3)}`
+      `${(cx + radius * Math.cos(a)).toFixed(2)},${(cy + radius * Math.sin(a)).toFixed(2)}`
     );
   }
   return pts.join(" ");
 }
 
-function diamond(cx: number, cy: number, d: number): string {
+function diamondPoints(cx: number, cy: number, d: number): string {
   return `${cx - d},${cy} ${cx},${cy - d} ${cx + d},${cy} ${cx},${cy + d}`;
 }
 
@@ -22,74 +22,76 @@ type Props = {
   isDark: boolean;
 };
 
+const STAR_OFFSETS: [number, number][] = [
+  [0.5, 0.5],
+  [0, 0], [1, 0], [0, 1], [1, 1],
+  [0.5, 0], [0.5, 1],
+  [0, 0.5], [1, 0.5],
+];
+
+const DIAMOND_OFFSETS: [number, number][] = [
+  [0.75, 0.5], [0.25, 0.5],
+  [0.5, 0.75], [0.5, 0.25],
+  [0.25, 0], [0.75, 0],
+  [0.25, 1], [0.75, 1],
+  [0, 0.25], [0, 0.75],
+  [1, 0.25], [1, 0.75],
+];
+
 export function IslamicPatternBg({ isDark }: Props) {
   const { width, height } = useWindowDimensions();
 
-  const T = 80;
-  const R = 12;
-  const r = 5;
-  const C = 8;
+  const T = 70;
+  const R = 11;
+  const r = 4.5;
+  const C = 7;
 
-  const color = isDark ? "#c9a550" : "#1a6b55";
-  const opacity = isDark ? 0.11 : 0.14;
-  const sw = 0.75;
+  const color    = isDark ? "#ffd060" : "#083020";
+  const sOpacity = isDark ? 0.55 : 0.50;
+  const sw       = 2.0;
 
-  const stars: [number, number][] = [
-    [T / 2, T / 2],
-    [0, 0], [T, 0], [0, T], [T, T],
-    [T / 2, 0], [T / 2, T],
-    [0, T / 2], [T, T / 2],
-  ];
+  const cols = Math.ceil(width  / T) + 2;
+  const rows = Math.ceil(height / T) + 2;
 
-  const diamonds: [number, number][] = [
-    [T / 2 + T / 4, T / 2],
-    [T / 2 - T / 4, T / 2],
-    [T / 2, T / 2 + T / 4],
-    [T / 2, T / 2 - T / 4],
-    [T / 4, 0], [3 * T / 4, 0],
-    [T / 4, T], [3 * T / 4, T],
-    [0, T / 4], [0, 3 * T / 4],
-    [T, T / 4], [T, 3 * T / 4],
-  ];
+  const tiles = useMemo(
+    () =>
+      Array.from({ length: rows }, (_, row) =>
+        Array.from({ length: cols }, (_, col) => ({
+          tx: (col - 1) * T,
+          ty: (row - 1) * T,
+          key: `${row}-${col}`,
+        }))
+      ).flat(),
+    [cols, rows, T]
+  );
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <Svg width={width} height={height}>
-        <Defs>
-          <Pattern
-            id="islamic-bg"
-            x="0"
-            y="0"
-            width={T}
-            height={T}
-            patternUnits="userSpaceOnUse"
-          >
-            {stars.map(([cx, cy], i) => (
+        {tiles.map(({ tx, ty, key }) => (
+          <G key={key} transform={`translate(${tx},${ty})`}>
+            {STAR_OFFSETS.map(([fx, fy], i) => (
               <Polygon
                 key={`s${i}`}
-                points={starPoints(cx, cy, R, r)}
+                points={starPoints(fx * T, fy * T, R, r)}
                 fill="none"
                 stroke={color}
                 strokeWidth={sw}
+                strokeOpacity={sOpacity}
               />
             ))}
-            {diamonds.map(([cx, cy], i) => (
+            {DIAMOND_OFFSETS.map(([fx, fy], i) => (
               <Polygon
                 key={`d${i}`}
-                points={diamond(cx, cy, C)}
+                points={diamondPoints(fx * T, fy * T, C)}
                 fill="none"
                 stroke={color}
                 strokeWidth={sw}
+                strokeOpacity={sOpacity}
               />
             ))}
-          </Pattern>
-        </Defs>
-        <Rect
-          width={width}
-          height={height}
-          fill="url(#islamic-bg)"
-          opacity={opacity}
-        />
+          </G>
+        ))}
       </Svg>
     </View>
   );
