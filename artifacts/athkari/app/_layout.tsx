@@ -5,6 +5,7 @@ import {
   IBMPlexSansArabic_700Bold,
   useFonts,
 } from "@expo-google-fonts/ibm-plex-sans-arabic";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -16,8 +17,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AppSplash } from "@/components/AppSplash";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OnboardingPermissions } from "@/components/OnboardingPermissions";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 import colors from "@/constants/colors";
+
+const ONBOARDED_KEY = "athkari:onboarded:v1";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,7 +31,21 @@ function ThemedStack() {
   const { theme } = useApp();
   const palette = theme === "dark" ? colors.dark : colors.light;
   const [splashDone, setSplashDone] = useState(false);
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem(ONBOARDED_KEY).then((val) => {
+      setOnboarded(val === "true");
+    }).catch(() => setOnboarded(true));
+  }, []);
+
   const handleSplashFinish = useCallback(() => setSplashDone(true), []);
+
+  const handleOnboardingDone = useCallback(() => {
+    AsyncStorage.setItem(ONBOARDED_KEY, "true").catch(() => {});
+    setOnboarded(true);
+  }, []);
+
   return (
     <>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
@@ -51,6 +69,9 @@ function ThemedStack() {
         />
       </Stack>
       {!splashDone && <AppSplash onFinish={handleSplashFinish} />}
+      {splashDone && onboarded === false && (
+        <OnboardingPermissions onDone={handleOnboardingDone} />
+      )}
     </>
   );
 }
