@@ -95,6 +95,34 @@ export function MawaqitView() {
   // Order shown right-to-left in the row: fajr first on the right, isha last on the left
   const prayerOrder: PrayerKey[] = ["isha", "maghrib", "asr", "dhuhr", "fajr"];
 
+  // Hijri + Gregorian dates (re-computed each day)
+  const dayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  const { hijriDate, gregorianDate } = useMemo(() => {
+    let hijri = "";
+    let gregorian = "";
+    try {
+      hijri = new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(now);
+    } catch {
+      hijri = "";
+    }
+    try {
+      gregorian = new Intl.DateTimeFormat("ar-EG", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(now);
+    } catch {
+      gregorian = now.toDateString();
+    }
+    return { hijriDate: hijri, gregorianDate: gregorian };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayKey]);
+
   // Re-schedule local notifications whenever times or settings change
   useEffect(() => {
     schedulePrayerNotifications(times, prayerNotifications, notificationsEnabled).catch(
@@ -127,18 +155,6 @@ export function MawaqitView() {
           style={styles.hero}
         >
           <StarPattern color="#ffffff" opacity={0.04} />
-          <View style={styles.archBackdrop} pointerEvents="none">
-            <CountdownMosqueArch
-              width={320}
-              height={280}
-              progress={remainingFraction}
-              outlineColor="rgba(255,255,255,0.18)"
-              traceColor="#ffffff"
-              glowColor="#67E8F9"
-              baseColor="rgba(255,255,255,0.32)"
-              strokeWidth={4}
-            />
-          </View>
           <View style={styles.heroTop}>
             <Pressable
               onPress={() => {
@@ -184,6 +200,19 @@ export function MawaqitView() {
             </Pressable>
           </View>
 
+          <View style={styles.archRow}>
+            <CountdownMosqueArch
+              width={220}
+              height={120}
+              progress={remainingFraction}
+              outlineColor="rgba(255,255,255,0.18)"
+              traceColor="#ffffff"
+              glowColor="#67E8F9"
+              baseColor="rgba(255,255,255,0.45)"
+              strokeWidth={4}
+            />
+          </View>
+
           <View style={styles.heroCenter}>
             <Text style={[styles.heroPrayer, { fontFamily: "IBMPlexSansArabic_700Bold" }]}>
               {prayerLabels[next.key]}
@@ -196,6 +225,16 @@ export function MawaqitView() {
                 {formatCountdown(remaining)}
               </Text>
             </View>
+          </View>
+
+          <View style={styles.datesRow}>
+            <Text style={[styles.dateText, { fontFamily: "IBMPlexSansArabic_500Medium" }]}>
+              {hijriDate}
+            </Text>
+            <View style={styles.dateDot} />
+            <Text style={[styles.dateText, { fontFamily: "IBMPlexSansArabic_500Medium" }]}>
+              {gregorianDate}
+            </Text>
           </View>
 
           <View style={styles.heroBottom}>
@@ -554,9 +593,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   hero: {
-    borderRadius: 28,
-    paddingHorizontal: 18,
-    paddingVertical: 18,
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     overflow: "hidden",
   },
   heroTop: {
@@ -581,66 +620,81 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   cityText: { color: "#fff", fontSize: 13, flexShrink: 1 },
-  archBackdrop: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 56,
-    bottom: 0,
+  archRow: {
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
+    marginTop: 10,
   },
   heroCenter: {
     alignItems: "center",
-    paddingTop: 28,
-    paddingBottom: 24,
-    minHeight: 200,
+    paddingTop: 6,
+    paddingBottom: 4,
   },
   heroPrayer: {
     color: "#fff",
-    fontSize: 36,
+    fontSize: 22,
     fontWeight: "700",
-    marginTop: 8,
+    marginTop: 0,
   },
   heroLabel: {
     color: "rgba(255,255,255,0.75)",
-    fontSize: 12,
-    marginTop: 6,
-    marginBottom: 14,
+    fontSize: 11,
+    marginTop: 2,
+    marginBottom: 8,
   },
   countdownPill: {
     backgroundColor: "rgba(255, 255, 255, 0.18)",
-    paddingHorizontal: 24,
-    paddingVertical: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.22)",
   },
   countdown: {
     color: "#fff",
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: "700",
     fontVariant: ["tabular-nums"],
-    letterSpacing: 2,
+    letterSpacing: 1.5,
     fontFamily: Platform.select({
       ios: "Menlo",
       android: "monospace",
       default: "ui-monospace, SFMono-Regular, Menlo, monospace",
     }),
   },
+  datesRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 12,
+    marginBottom: 4,
+    paddingHorizontal: 4,
+  },
+  dateText: {
+    color: "rgba(255,255,255,0.85)",
+    fontSize: 11,
+  },
+  dateDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.45)",
+  },
   heroBottom: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "rgba(255,255,255,0.08)",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 16,
-    marginTop: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 14,
+    marginTop: 10,
   },
-  heroBottomTime: { color: "#fff", fontSize: 14 },
+  heroBottomTime: { color: "#fff", fontSize: 13 },
   nextRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  heroBottomLabel: { color: "rgba(255,255,255,0.85)", fontSize: 12 },
+  heroBottomLabel: { color: "rgba(255,255,255,0.85)", fontSize: 11 },
   section: { marginTop: 22, paddingHorizontal: 16 },
   sectionTitle: {
     fontSize: 16,
