@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>AdMob Footer Banner</title>
+
+  <!--
+  ╔══════════════════════════════════════════╗
+  ║        Google AdSense / AdMob SDK        ║
+  ║  Publisher: pub-6484709364382743         ║
+  ╚══════════════════════════════════════════╝
+  -->
+  <script async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6484709364382743"
+    crossorigin="anonymous">
+  </script>
+
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #f4f6f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* push content above the fixed footer */
+      padding-bottom: 60px;
+    }
+
+    /* ── Placeholder for your app content ── */
+    .app-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 17px;
+    }
+
+    /* ════════════════════════════════════════
+       ADMOB BANNER FOOTER
+       ════════════════════════════════════════ */
+    .admob-banner-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+
+      background: #ffffff;
+      border-top: 1px solid #dde1e7;
+      box-shadow: 0 -3px 14px rgba(0, 0, 0, 0.10);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      min-height: 50px;
+      padding: 5px 0;
+    }
+
+    /* shimmer loading animation */
+    .ad-shimmer {
+      width: 320px;
+      height: 50px;
+      border-radius: 6px;
+      background: linear-gradient(
+        90deg,
+        #e8eaed 25%,
+        #f3f4f6 50%,
+        #e8eaed 75%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite ease-in-out;
+      position: absolute;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* hide shimmer once the ad iframe fills the slot */
+    .adsbygoogle[data-ad-status] ~ .ad-shimmer {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ░░ محتوى التطبيق ░░ -->
+  <div class="app-content">محتوى التطبيق</div>
+
+
+  <!-- ════════════════════════════════════════
+       ADMOB FOOTER BANNER AD UNIT
+       ─────────────────────────────────────
+       App ID   : ca-app-pub-6484709364382743~1638344904
+       Ad Unit  : ca-app-pub-6484709364382743/4375129391
+       Format   : Banner 320×50
+       ════════════════════════════════════════ -->
+  <div class="admob-banner-footer" role="complementary" aria-label="إعلان">
+
+    <ins class="adsbygoogle"
+         style="display:inline-block; width:320px; height:50px;"
+         data-ad-client="ca-pub-6484709364382743"
+         data-ad-slot="4375129391"
+         data-ad-format="banner"
+         data-full-width-responsive="true">
+    </ins>
+
+    <!-- shimmer يظهر أثناء التحميل -->
+    <div class="ad-shimmer" aria-hidden="true"></div>
+
+  </div>
+
+  <script>
+    // تفعيل وحدة الإعلان
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+
+</body>
+</html>
