@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   center: {
     alignItems: "center",
-    gap: 14,
+    gap: 2,
   },
   logo: {
     width: 180,

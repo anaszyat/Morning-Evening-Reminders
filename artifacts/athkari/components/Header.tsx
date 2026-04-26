@@ -70,8 +70,8 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   logo: {
-    width: 48,
-    height: 48,
+    width: 56,
+    height: 56,
   },
   title: {
     fontSize: 16,
