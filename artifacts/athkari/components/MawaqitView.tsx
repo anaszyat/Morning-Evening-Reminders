@@ -645,18 +645,18 @@ const styles = StyleSheet.create({
   },
   countdownPill: {
     backgroundColor: "rgba(255, 255, 255, 0.18)",
-    paddingHorizontal: 18,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.22)",
   },
   countdown: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "700",
     fontVariant: ["tabular-nums"],
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,
     fontFamily: Platform.select({
       ios: "Menlo",
       android: "monospace",

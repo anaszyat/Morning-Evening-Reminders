@@ -7,7 +7,7 @@ export type Dhikr = {
 };
 
 export type AdhkarCategory = {
-  id: "morning" | "evening" | "sleep" | "wake";
+  id: "morning" | "evening" | "prayer" | "sleep" | "wake";
   title: string;
   subtitle: string;
   items: Dhikr[];
@@ -273,6 +273,78 @@ export const eveningAdhkar: Dhikr[] = [
   },
 ];
 
+export const prayerAdhkar: Dhikr[] = [
+  {
+    id: "p1",
+    text: "أَسْتَغْفِرُ اللَّهَ.",
+    count: 3,
+    reference: "رواه مسلم",
+  },
+  {
+    id: "p2",
+    text: "اللَّهُمَّ أَنْتَ السَّلَامُ، وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ.",
+    count: 1,
+    reference: "رواه مسلم",
+  },
+  {
+    id: "p3",
+    text: "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ، اللَّهُمَّ لَا مَانِعَ لِمَا أَعْطَيْتَ، وَلَا مُعْطِيَ لِمَا مَنَعْتَ، وَلَا يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ.",
+    count: 1,
+    reference: "متفق عليه",
+  },
+  {
+    id: "p4",
+    text: "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ، وَلَا نَعْبُدُ إِلَّا إِيَّاهُ، لَهُ النِّعْمَةُ وَلَهُ الْفَضْلُ وَلَهُ الثَّنَاءُ الْحَسَنُ، لَا إِلَٰهَ إِلَّا اللَّهُ مُخْلِصِينَ لَهُ الدِّينَ وَلَوْ كَرِهَ الْكَافِرُونَ.",
+    count: 1,
+    reference: "رواه مسلم",
+  },
+  {
+    id: "p5",
+    text: "سُبْحَانَ اللَّهِ.",
+    count: 33,
+    reference: "رواه مسلم",
+  },
+  {
+    id: "p6",
+    text: "الْحَمْدُ لِلَّهِ.",
+    count: 33,
+    reference: "رواه مسلم",
+  },
+  {
+    id: "p7",
+    text: "اللَّهُ أَكْبَرُ.",
+    count: 33,
+    reference: "رواه مسلم",
+  },
+  {
+    id: "p8",
+    text: "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ.",
+    count: 1,
+    fadl: "تكملةً للمئة بعد التسبيح والتحميد والتكبير.",
+    reference: "رواه مسلم",
+  },
+  {
+    id: "p9",
+    text: "آيَةُ الْكُرْسِيِّ.",
+    count: 1,
+    fadl: "من قرأها دبر كل صلاة مكتوبة لم يمنعه من دخول الجنة إلا أن يموت.",
+    reference: "رواه النسائي",
+  },
+  {
+    id: "p10",
+    text: "قُلْ هُوَ اللَّهُ أَحَدٌ، وَالْمُعَوِّذَتَيْنِ (الْفَلَقِ وَالنَّاسِ).",
+    count: 1,
+    fadl: "تُقرأ بعد كل صلاة، وتُكرَّر ثلاثاً بعد الفجر والمغرب.",
+    reference: "رواه أبو داود والترمذي والنسائي",
+  },
+  {
+    id: "p11",
+    text: "اللَّهُمَّ أَعِنِّي عَلَىٰ ذِكْرِكَ، وَشُكْرِكَ، وَحُسْنِ عِبَادَتِكَ.",
+    count: 1,
+    reference: "رواه أبو داود والنسائي",
+  },
+];
+
 export const sleepAdhkar: Dhikr[] = [
   {
     id: "s1",
@@ -354,6 +426,12 @@ export const adhkarCategories: AdhkarCategory[] = [
     items: eveningAdhkar,
   },
   {
+    id: "prayer",
+    title: "أذكار الصلاة",
+    subtitle: "تُقال بعد الصلوات المكتوبة",
+    items: prayerAdhkar,
+  },
+  {
     id: "sleep",
     title: "أذكار النوم",
     subtitle: "تُقال قبل النوم",
@@ -372,4 +450,8 @@ export function getCategory(id: string): AdhkarCategory | undefined {
 }
 
 export const totalDailyAdhkar =
-  morningAdhkar.length + eveningAdhkar.length + sleepAdhkar.length + wakeAdhkar.length;
+  morningAdhkar.length +
+  eveningAdhkar.length +
+  prayerAdhkar.length +
+  sleepAdhkar.length +
+  wakeAdhkar.length;

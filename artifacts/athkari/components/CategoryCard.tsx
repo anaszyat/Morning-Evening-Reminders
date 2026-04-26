@@ -11,6 +11,7 @@ import { useColors } from "@/hooks/useColors";
 const ICON_MAP: Record<AdhkarCategory["id"], { icon: keyof typeof Feather.glyphMap; gradient: [string, string] }> = {
   morning: { icon: "sunrise", gradient: ["#3B82F6", "#1E40AF"] },
   evening: { icon: "sunset", gradient: ["#6366F1", "#4338CA"] },
+  prayer: { icon: "book-open", gradient: ["#0EA5E9", "#0369A1"] },
   sleep: { icon: "moon", gradient: ["#1E3A8A", "#0F172A"] },
   wake: { icon: "sun", gradient: ["#F59E0B", "#D97706"] },
 };
