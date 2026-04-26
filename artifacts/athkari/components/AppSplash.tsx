@@ -146,19 +146,6 @@ export function AppSplash({ onFinish }: Props) {
             transition={0}
           />
         </Animated.View>
-        <Animated.Text
-          style={[
-            styles.title,
-            {
-              color: colors.primary,
-              fontFamily: "IBMPlexSansArabic_700Bold",
-              opacity: titleOpacity,
-              transform: [{ translateY: titleTranslateY }],
-            },
-          ]}
-        >
-          أذكاري
-        </Animated.Text>
       </View>
     </Animated.View>
   );
