@@ -9,11 +9,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { AppSplash } from "@/components/AppSplash";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 import colors from "@/constants/colors";
@@ -25,6 +26,8 @@ const queryClient = new QueryClient();
 function ThemedStack() {
   const { theme } = useApp();
   const palette = theme === "dark" ? colors.dark : colors.light;
+  const [splashDone, setSplashDone] = useState(false);
+  const handleSplashFinish = useCallback(() => setSplashDone(true), []);
   return (
     <>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
@@ -47,6 +50,7 @@ function ThemedStack() {
           }}
         />
       </Stack>
+      {!splashDone && <AppSplash onFinish={handleSplashFinish} />}
     </>
   );
 }

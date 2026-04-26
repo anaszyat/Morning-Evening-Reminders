@@ -1,9 +1,12 @@
 import { Feather } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 import { useApp } from "@/contexts/AppContext";
+
+const LOGO = require("@/assets/images/logo.png");
 
 export function Header() {
   const colors = useColors();
@@ -30,11 +33,20 @@ export function Header() {
       </Pressable>
 
       <View style={styles.titleWrap}>
-        <Text style={[styles.title, { color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
+        <Image
+          source={LOGO}
+          style={styles.logo}
+          contentFit="contain"
+          transition={150}
+          accessibilityLabel="شعار أذكاري"
+        />
+        <Text
+          style={[
+            styles.title,
+            { color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" },
+          ]}
+        >
           أذكاري
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_400Regular" }]}>
-          حصن المسلم
         </Text>
       </View>
 
@@ -49,19 +61,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 18,
-    paddingVertical: 6,
+    paddingTop: 6,
+    paddingBottom: 8,
   },
   titleWrap: {
     alignItems: "center",
     flex: 1,
+    gap: 2,
+  },
+  logo: {
+    width: 48,
+    height: 48,
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
-  },
-  subtitle: {
-    fontSize: 10,
-    marginTop: 1,
+    marginTop: 2,
   },
   themeBtn: {
     width: 32,
