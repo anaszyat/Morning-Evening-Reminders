@@ -254,9 +254,6 @@ export default function CategoryScreen() {
                     {category.subtitle}
                   </Text>
                 </View>
-                <View style={[styles.heroIcon, { backgroundColor: headerStyle.iconBg }]}>
-                  <Feather name={headerStyle.icon} size={32} color={headerStyle.iconColor} />
-                </View>
               </View>
 
               <View style={styles.heroFooter}>
@@ -454,43 +451,32 @@ const styles = StyleSheet.create({
   },
   cornerBtn: {
     position: "absolute",
-    top: 10,
+    top: 28,
     width: 32,
     height: 32,
-    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
   },
-  cornerRight: { right: 10 },
-  cornerLeft: { left: 10 },
+  cornerRight: { right: 10, borderRadius: 16 },
+  cornerLeft: { left: 10, borderRadius: 8 },
   heroBody: {
     flex: 1,
-    flexDirection: "row-reverse",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
+    justifyContent: "center",
     paddingHorizontal: 48,
   },
   heroText: {
-    flex: 1,
-    alignItems: "flex-end",
+    alignItems: "center",
   },
   heroTitle: {
     fontSize: 20,
-    textAlign: "right",
+    textAlign: "center",
   },
   heroSub: {
     fontSize: 12,
     marginTop: 4,
-    textAlign: "right",
-  },
-  heroIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
+    textAlign: "center",
   },
   heroFooter: {
     flexDirection: "row-reverse",
