@@ -15,17 +15,29 @@ export function AdhkarView() {
     >
       <HeroProgress />
       <View style={styles.spacer} />
-      {adhkarCategories.map((c) => (
-        <CategoryCard
-          key={c.id}
-          category={c}
-          onPress={() => router.push(`/dhikr/${c.id}` as never)}
-        />
-      ))}
+      <View style={styles.grid}>
+        {adhkarCategories.map((c) => (
+          <View key={c.id} style={styles.cell}>
+            <CategoryCard
+              category={c}
+              onPress={() => router.push(`/dhikr/${c.id}` as never)}
+            />
+          </View>
+        ))}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   spacer: { height: 18 },
+  grid: {
+    flexDirection: "row-reverse",
+    flexWrap: "wrap",
+    paddingHorizontal: 10,
+  },
+  cell: {
+    width: "50%",
+    padding: 6,
+  },
 });

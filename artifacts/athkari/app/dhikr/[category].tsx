@@ -154,6 +154,30 @@ const HEADER_STYLES: Record<
       trackColor: "rgba(255,255,255,0.18)",
     },
   },
+  duas: {
+    light: {
+      gradient: ["#EDE9FE", "#C4B5FD"],
+      iconBg: "#F5F3FF",
+      icon: "heart",
+      iconColor: "#7C3AED",
+      textColor: "#4C1D95",
+      subColor: "#5B21B6",
+      cornerColor: "#4C1D95",
+      cornerBg: "rgba(255,255,255,0.55)",
+      trackColor: "rgba(76,29,149,0.18)",
+    },
+    dark: {
+      gradient: ["#2E1065", "#1A0445"],
+      iconBg: "rgba(167,139,250,0.18)",
+      icon: "heart",
+      iconColor: "#A78BFA",
+      textColor: "#F8FAFC",
+      subColor: "#DDD6FE",
+      cornerColor: "#F8FAFC",
+      cornerBg: "rgba(255,255,255,0.12)",
+      trackColor: "rgba(255,255,255,0.18)",
+    },
+  },
 };
 
 export default function CategoryScreen() {
@@ -458,7 +482,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     zIndex: 2,
   },
-  cornerRight: { right: 10, borderRadius: 16 },
+  cornerRight: { right: 10, borderRadius: 8 },
   cornerLeft: { left: 10, borderRadius: 8 },
   heroBody: {
     flex: 1,
