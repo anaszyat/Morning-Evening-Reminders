@@ -4,7 +4,6 @@ import * as Haptics from "expo-haptics";
 import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/hooks/useColors";
 
 export type TabKey = "athkar" | "mawaqit" | "qibla" | "tasbih";
@@ -31,22 +30,9 @@ type Props = {
 
 export function TopTabs({ active, onChange, onSettingsPress, settingsActive }: Props) {
   const colors = useColors();
-  const { theme, toggleTheme } = useApp();
-  const isDark = theme === "dark";
 
   return (
     <View style={styles.wrapper}>
-      {/* Left — theme toggle */}
-      <Pressable
-        onPress={() => {
-          if (Platform.OS !== "web") Haptics.selectionAsync().catch(() => {});
-          toggleTheme();
-        }}
-        style={({ pressed }) => [styles.iconBtn, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
-      >
-        <Feather name={isDark ? "sun" : "moon"} size={18} color={colors.primary} />
-      </Pressable>
-
       {/* Center — 4-tab pill bar */}
       <View style={[styles.bar, { backgroundColor: colors.card, borderColor: colors.border }]}>
         {TABS.map((t) => {

@@ -1,9 +1,13 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import React from "react";
-import { Alert, Linking, Platform, Pressable, Share, StyleSheet, Text, View, ScrollView } from "react-native";
+import { Alert, Linking, Platform, Pressable, Share, StyleSheet, Switch, Text, View, ScrollView } from "react-native";
 
+import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/hooks/useColors";
+
+const LOGO = require("@/assets/images/logo.png");
 
 type RowProps = {
   icon: keyof typeof Feather.glyphMap;
@@ -44,6 +48,8 @@ function SettingRow({ icon, iconColor, label, subLabel, right, onPress }: RowPro
 
 export function SettingsView({ onStatsPress }: { onStatsPress?: () => void }) {
   const colors = useColors();
+  const { theme, toggleTheme } = useApp();
+  const isDark = theme === "dark";
 
   const handleShare = async () => {
     if (Platform.OS !== "web") {
@@ -83,6 +89,12 @@ export function SettingsView({ onStatsPress }: { onStatsPress?: () => void }) {
       contentContainerStyle={styles.container}
     >
       <View style={styles.profileCard}>
+        <Image
+          source={LOGO}
+          style={styles.logo}
+          contentFit="contain"
+          accessibilityLabel="شعار أذكاري"
+        />
         <Text style={[styles.appName, { color: colors.primary, fontFamily: "IBMPlexSansArabic_700Bold" }]}>
           أذكاري
         </Text>
@@ -90,6 +102,28 @@ export function SettingsView({ onStatsPress }: { onStatsPress?: () => void }) {
           الإصدار 1.0.0
         </Text>
       </View>
+
+      <Text style={[styles.section, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
+        المظهر
+      </Text>
+
+      <SettingRow
+        icon={isDark ? "moon" : "sun"}
+        iconColor="#6366F1"
+        label={isDark ? "الوضع الليلي" : "الوضع النهاري"}
+        subLabel="تبديل بين الوضع الفاتح والداكن"
+        right={
+          <Switch
+            value={isDark}
+            onValueChange={() => {
+              if (Platform.OS !== "web") Haptics.selectionAsync().catch(() => {});
+              toggleTheme();
+            }}
+            trackColor={{ false: colors.muted, true: colors.primary }}
+            thumbColor="#fff"
+          />
+        }
+      />
 
       <Text style={[styles.section, { color: colors.mutedForeground, fontFamily: "IBMPlexSansArabic_600SemiBold" }]}>
         التطبيق
@@ -143,6 +177,7 @@ export function SettingsView({ onStatsPress }: { onStatsPress?: () => void }) {
 const styles = StyleSheet.create({
   container: { paddingHorizontal: 16, paddingBottom: 100 },
   profileCard: { alignItems: "center", paddingVertical: 20 },
+  logo: { width: 96, height: 96, borderRadius: 22, marginBottom: 8 },
   appName: { fontSize: 22 },
   appVersion: { fontSize: 13, marginTop: 4 },
   section: { fontSize: 12, textTransform: "uppercase", letterSpacing: 1, marginTop: 24, marginBottom: 8, textAlign: "right" },
