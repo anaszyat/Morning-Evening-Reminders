@@ -11,13 +11,20 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+
+if (Text.defaultProps) {
+  Text.defaultProps.style = { fontFamily: "IBMPlexSansArabic_400Regular" };
+} else {
+  Text.defaultProps = { style: { fontFamily: "IBMPlexSansArabic_400Regular" } };
+}
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AppSplash } from "@/components/AppSplash";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
 import { OnboardingPermissions } from "@/components/OnboardingPermissions";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 import colors from "@/constants/colors";
@@ -112,6 +119,7 @@ export default function RootLayout() {
           </GestureHandlerRootView>
         </QueryClientProvider>
       </ErrorBoundary>
+    <BannerAd unitId="ca-app-pub-6484709364382743/4375129391" size={BannerAdSize.BANNER} />
     </SafeAreaProvider>
   );
 }

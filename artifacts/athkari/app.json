@@ -22,8 +22,11 @@
     "android": {
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
-      ]
+        "ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.anaszyat.athkari"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -47,6 +50,15 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e702b45a-f06b-468d-980e-6b81079e7cb2"
+      }
+    },
+    "owner": "anaszyat",
+    "plugins": [
+      ["react-native-google-mobile-ads", {"androidAppId": "ca-app-pub-6484709364382743~1638344904"}]
+    ]
   }
 }

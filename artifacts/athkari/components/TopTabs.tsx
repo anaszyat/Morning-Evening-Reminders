@@ -6,7 +6,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 
-export type TabKey = "athkar" | "mawaqit" | "qibla" | "tasbih";
+export type TabKey = "athkar" | "mawaqit" | "tasbih";
 
 export type TabDef = {
   key: TabKey;
@@ -17,7 +17,6 @@ export type TabDef = {
 export const TABS: TabDef[] = [
   { key: "athkar",  label: "الأذكار",  icon: "book-open" },
   { key: "tasbih",  label: "المسبحة",  icon: "star" },
-  { key: "qibla",   label: "القبلة",   icon: "compass" },
   { key: "mawaqit", label: "المواقيت", icon: "clock" },
 ];
 

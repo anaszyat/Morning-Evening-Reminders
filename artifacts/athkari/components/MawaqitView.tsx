@@ -155,33 +155,6 @@ export function MawaqitView() {
           style={styles.hero}
         >
           <StarPattern color="#ffffff" opacity={0.04} />
-          <View style={styles.heroTop}>
-            <Pressable
-              onPress={() => {
-                if (Platform.OS !== "web") {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-                }
-                setShowNotifModal(true);
-              }}
-              style={({ pressed }) => [
-                styles.pill,
-                {
-                  backgroundColor: notificationsEnabled
-                    ? "rgba(255,255,255,0.18)"
-                    : "rgba(255,255,255,0.08)",
-                  opacity: pressed ? 0.85 : 1,
-                },
-              ]}
-            >
-              <Feather
-                name={notificationsEnabled ? "bell" : "bell-off"}
-                size={14}
-                color="#fff"
-              />
-              <Text style={[styles.pillText, { fontFamily: "IBMPlexSansArabic_500Medium" }]}>
-                تنبيهات الأذان
-              </Text>
-            </Pressable>
 
             <Pressable
               onPress={() => setShowCityPicker(true)}

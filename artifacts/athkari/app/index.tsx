@@ -48,7 +48,6 @@ export default function HomeScreen() {
         )}
         {overlay === null && tab === "athkar"  && <AdhkarView />}
         {overlay === null && tab === "tasbih"  && <TasbihView />}
-        {overlay === null && tab === "qibla"   && <QiblaView />}
         {overlay === null && tab === "mawaqit" && <MawaqitView />}
       </View>
     </View>
